@@ -1,8 +1,12 @@
 import { client } from './client'
 import { NotificationResponse } from '../types/api'
 
+interface PageResponse<T> {
+  content: T[]
+}
+
 export const fetchNotifications = () =>
-  client.get<NotificationResponse[]>('/api/notifications').then((r) => r.data)
+  client.get<PageResponse<NotificationResponse>>('/api/notifications').then((r) => r.data.content)
 
 export const markRead = (notificationId: number) =>
   client.patch<void>(`/api/notifications/${notificationId}/read`)

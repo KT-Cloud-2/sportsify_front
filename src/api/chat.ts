@@ -1,8 +1,18 @@
 import { client } from './client'
 import { ChatRoomResponse, MessageResponse } from '../types/api'
 
+interface ChatRoomListResponse {
+  items: ChatRoomResponse[]
+  nextCursor: number | null
+  hasNext: boolean
+  totalCount: number
+}
+
+// GET /api/chat/rooms 은 @RequestBody로 type 필드를 요구함
 export const fetchChatRooms = () =>
-  client.get<ChatRoomResponse[]>('/api/chat/rooms').then((r) => r.data)
+  client.get<ChatRoomListResponse>('/api/chat/rooms', {
+    data: { type: 'GAME', limit: 50 },
+  }).then((r) => r.data.items ?? [])
 
 export const fetchChatRoomByGame = (gameId: number) =>
   client.get<ChatRoomResponse>(`/api/chat/rooms/game/${gameId}`).then((r) => r.data)
