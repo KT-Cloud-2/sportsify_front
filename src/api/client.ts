@@ -19,7 +19,11 @@ client.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
-    if (error.response?.status !== 401 || original._retry) {
+    const status = error.response?.status
+    const code = error.response?.data?.code
+
+    // JWT 만료/미제출일 때만 refresh 시도 — 다른 401(INVALID_REFRESH_TOKEN 등)은 그대로 reject
+    if (status !== 401 || code !== 'UNAUTHORIZED' || original._retry) {
       return Promise.reject(error)
     }
     original._retry = true
