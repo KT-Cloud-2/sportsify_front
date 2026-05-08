@@ -28,13 +28,8 @@ export function NavBar() {
         display: 'flex', alignItems: 'center', padding: '0 28px', height: 58, gap: 28, flexShrink: 0,
         position: 'sticky', top: 0, zIndex: 30,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 12 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 7,
-            background: `linear-gradient(135deg,${C.teal},${C.deep})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 800, color: '#fff', fontSize: 13,
-          }}>S</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 12 }}>
+          <img src="/logo.svg" alt="Sportify" style={{ width: 28, height: 28, borderRadius: 6 }} />
           <span style={{ fontWeight: 800, fontSize: 16, color: C.teal, letterSpacing: '-0.02em' }}>
             Sportify
           </span>
