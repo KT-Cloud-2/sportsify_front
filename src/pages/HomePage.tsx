@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
 import { GameCard } from '../components/GameCard'
 import { useGames } from '../hooks/useGames'
-import { useNotifications } from '../hooks/useNotifications'
 import { C } from '../styles/tokens'
 
 const SPORT_FILTERS = [
@@ -17,12 +16,10 @@ export function HomePage() {
   const navigate = useNavigate()
   const [sportType, setSportType] = useState<string | undefined>()
   const { data: games, isLoading, isError } = useGames({ sportType })
-  const { data: notifications } = useNotifications()
-  const unreadCount = notifications?.filter((n) => !n.read).length ?? 0
 
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
-      <NavBar unreadCount={unreadCount} />
+      <NavBar />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 24, margin: '0 0 24px' }}>경기 일정</h1>

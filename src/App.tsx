@@ -6,6 +6,8 @@ import { HomePage } from './pages/HomePage'
 import { GameDetailPage } from './pages/GameDetailPage'
 import { ChatPage } from './pages/ChatPage'
 import { MyPage } from './pages/MyPage'
+import { TicketPage } from './pages/TicketPage'
+import { PaymentPage } from './pages/PaymentPage'
 import { useAuthStore } from './store/auth'
 import { C } from './styles/tokens'
 
@@ -50,6 +52,8 @@ export default function App() {
             <Route path="/games/:gameId" element={<PrivateRoute><GameDetailPage /></PrivateRoute>} />
             <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
             <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+            <Route path="/tickets" element={<PrivateRoute><TicketPage /></PrivateRoute>} />
+            <Route path="/payments" element={<PrivateRoute><PaymentPage /></PrivateRoute>} />
           </Routes>
         </ErrorBoundary>
       </BrowserRouter>

@@ -81,6 +81,75 @@ export interface GameSeatListResponseDto {
   status: string
 }
 
+// Member (extended)
+export interface UpdateNicknameResponse {
+  nickname: string
+}
+
+export interface MonthlyActivityAttendedGame {
+  gameId: number
+  team1Name: string
+  team2Name: string
+  gameTime: string
+  venue: string
+}
+
+export interface MonthlyActivityResponse {
+  year: number
+  month: number
+  ticketCount: number
+  chatMessageCount: number
+  attendedGames: MonthlyActivityAttendedGame[]
+}
+
+// Ticket
+export type TicketStatus = 'RESERVED' | 'CANCELLED' | 'USED'
+
+export interface TicketResponse {
+  ticketId: number
+  gameId: number
+  seatId: number
+  grade: string
+  section: string
+  rowNumber: string
+  seatNumber: string
+  price: number
+  status: TicketStatus
+  createdAt: string
+}
+
+export interface ReserveTicketRequest {
+  gameId: number
+  seatId: number
+}
+
+export interface QueuePositionResponse {
+  position: number
+  estimatedWaitSeconds: number
+}
+
+// Payment
+export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+
+export interface PaymentResponse {
+  paymentId: number
+  ticketId: number
+  amount: number
+  status: PaymentStatus
+  pgOrderId: string
+  createdAt: string
+}
+
+export interface PaymentRequestBody {
+  ticketId: number
+  amount: number
+}
+
+export interface PaymentVerifyBody {
+  pgOrderId: string
+  pgPaymentId: string
+}
+
 // Chat
 export interface ChatRoomResponse {
   roomId: number
@@ -92,12 +161,38 @@ export interface ChatRoomResponse {
   createdAt: string
 }
 
+export interface ChatRoomDetailResponse {
+  roomId: number
+  type: string
+  gameId: number | null
+  name: string
+  imageUrl: string | null
+  currentParticipants: number
+  createdBy: number
+  createdAt: string
+  myMembership: ChatRoomMembershipResponse | null
+}
+
+export interface ChatRoomMembershipResponse {
+  roomId: number
+  memberId: number
+  status: string
+  joinedAt: string
+}
+
 export interface MessageResponse {
   messageId: number
   senderId: number
   type: string
   content: string
   createdAt: string
+}
+
+export interface MessageListResponse {
+  items: MessageResponse[]
+  nextCursor: number | null
+  hasNext: boolean
+  totalCount: number
 }
 
 // Notification
@@ -107,10 +202,38 @@ export type NotificationEventType =
   | 'PAYMENT_COMPLETED'
   | 'CHAT_MENTION'
 
+export type NotificationChannelType = 'EMAIL' | 'MQTT' | 'SLACK'
+
 export interface NotificationResponse {
   id: number
   eventType: NotificationEventType
   payload: string
   read: boolean
   createdAt: string
+}
+
+export interface NotificationSettingResponse {
+  ticketOpenAlert: boolean
+  gameStartAlert: boolean
+  paymentAlert: boolean
+  chatMentionAlert: boolean
+}
+
+export interface UpdateNotificationSettingRequest {
+  ticketOpenAlert: boolean
+  gameStartAlert: boolean
+  paymentAlert: boolean
+  chatMentionAlert: boolean
+}
+
+export interface NotificationChannelResponse {
+  id: number
+  channelType: NotificationChannelType
+  channelTarget: string
+  enabled: boolean
+}
+
+export interface RegisterChannelRequest {
+  channelType: NotificationChannelType
+  channelTarget: string
 }

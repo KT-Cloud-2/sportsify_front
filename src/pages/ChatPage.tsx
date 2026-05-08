@@ -1,24 +1,81 @@
 import { useState } from 'react'
 import { NavBar } from '../components/NavBar'
 import { ChatPanel } from '../components/ChatPanel'
-import { useChatRooms, useMessages, useSendMessage } from '../hooks/useChat'
+import { Btn } from '../components/Btn'
+import {
+  useChatRooms,
+  useChatRoomDetail,
+  useJoinChatRoom,
+  useLeaveChatRoom,
+  useMessages,
+  useSendMessage,
+  useDeleteMessage,
+} from '../hooks/useChat'
 import { useMe } from '../hooks/useMembers'
 import { C } from '../styles/tokens'
 
+function RoomHeader({ roomId, currentUserId }: { roomId: number; currentUserId: number }) {
+  const { data: detail } = useChatRoomDetail(roomId)
+  const { mutate: leave, isPending: leaving } = useLeaveChatRoom()
+  const { mutate: join, isPending: joining } = useJoinChatRoom()
+
+  if (!detail) return null
+
+  const myStatus = detail.myMembership?.status
+  const isJoined = myStatus === 'JOINED'
+
+  return (
+    <div style={{
+      padding: '12px 20px', borderBottom: `1px solid ${C.border}`,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      background: C.card,
+    }}>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 14, color: C.fg1 }}>{detail.name}</div>
+        <div style={{ fontSize: 12, color: C.fg4, marginTop: 2 }}>
+          참여자 {detail.currentParticipants}명 · {detail.type}
+          {detail.gameId && ` · 경기 #${detail.gameId}`}
+        </div>
+      </div>
+      <div>
+        {detail.createdBy !== currentUserId && (
+          isJoined ? (
+            <Btn variant="ghost" size="sm" onClick={() => leave(roomId)} disabled={leaving}>
+              나가기
+            </Btn>
+          ) : (
+            <Btn size="sm" onClick={() => join(roomId)} disabled={joining}>
+              참여
+            </Btn>
+          )
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function ChatPage() {
-  const { data: rooms } = useChatRooms()
+  const { data: rooms, isLoading: roomsLoading } = useChatRooms()
   const { data: me } = useMe()
   const [selectedRoomId, setSelectedRoomId] = useState<number>(0)
 
   const { data: messages = [] } = useMessages(selectedRoomId)
   const { mutate: send, isPending } = useSendMessage(selectedRoomId)
+  const { mutate: deleteMsg } = useDeleteMessage(selectedRoomId)
+
+  const currentUserId = me?.memberId ?? 0
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: C.dark, color: C.fg1 }}>
       <NavBar />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* 사이드바 */}
         <div style={{ width: 260, borderRight: `1px solid ${C.border}`, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.fg3, marginBottom: 8 }}>채팅방</div>
+          {roomsLoading && <div style={{ fontSize: 12, color: C.fg4 }}>불러오는 중...</div>}
+          {!roomsLoading && rooms?.length === 0 && (
+            <div style={{ fontSize: 12, color: C.fg4 }}>참여한 채팅방이 없습니다.</div>
+          )}
           {rooms?.map((room) => (
             <button
               key={room.roomId}
@@ -30,22 +87,29 @@ export function ChatPage() {
                 color: C.fg1, fontSize: 13, cursor: 'pointer', width: '100%',
               }}
             >
-              {room.name}
+              <div style={{ fontWeight: 600 }}>{room.name}</div>
+              <div style={{ fontSize: 11, color: C.fg4, marginTop: 3 }}>{room.type}</div>
             </button>
           ))}
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* 채팅 영역 */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {selectedRoomId > 0 ? (
-            <ChatPanel
-              messages={messages}
-              currentUserId={me?.memberId ?? 0}
-              onSend={send}
-              isSending={isPending}
-            />
+            <>
+              <RoomHeader roomId={selectedRoomId} currentUserId={currentUserId} />
+              <ChatPanel
+                messages={messages}
+                currentUserId={currentUserId}
+                onSend={send}
+                onDelete={deleteMsg}
+                isSending={isPending}
+              />
+            </>
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.fg4 }}>
-              채팅방을 선택하세요
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.fg4, flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 24 }}>💬</div>
+              <div style={{ fontSize: 13 }}>채팅방을 선택하세요</div>
             </div>
           )}
         </div>
