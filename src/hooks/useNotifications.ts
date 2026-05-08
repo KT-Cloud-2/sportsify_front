@@ -4,8 +4,15 @@ import { fetchNotifications, markRead, markAllRead } from '../api/notifications'
 import { NotificationResponse } from '../types/api'
 import { useAuthStore } from '../store/auth'
 
-export const useNotifications = () =>
-  useQuery({ queryKey: ['notifications'], queryFn: fetchNotifications })
+export const useNotifications = () => {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotifications,
+    enabled: !!accessToken,
+    throwOnError: false,
+  })
+}
 
 export const useMarkRead = () => {
   const qc = useQueryClient()
