@@ -1,100 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { C } from '../styles/tokens'
-import { NotificationResponse, NotificationEventType } from '../types/api'
+import { NotificationResponse } from '../types/api'
 import { useMarkRead, useMarkAllRead } from '../hooks/useNotifications'
-
-const EVENT_LABEL: Record<NotificationEventType, string> = {
-  TICKET_OPEN: '티켓 오픈',
-  GAME_START: '경기 시작',
-  PAYMENT_COMPLETED: '결제 완료',
-  CHAT_MENTION: '채팅 멘션',
-}
-
-const EVENT_COLOR: Record<NotificationEventType, string> = {
-  TICKET_OPEN: C.teal,
-  GAME_START: C.warning,
-  PAYMENT_COMPLETED: C.success,
-  CHAT_MENTION: C.info,
-}
-
-const EVENT_ICON: Record<NotificationEventType, string> = {
-  TICKET_OPEN: '🎫',
-  GAME_START: '⚾',
-  PAYMENT_COMPLETED: '✅',
-  CHAT_MENTION: '💬',
-}
-
-// payload JSON 파싱 — 실패 시 null 반환
-function parsePayload(payload: string): Record<string, unknown> | null {
-  try {
-    return JSON.parse(payload)
-  } catch {
-    return null
-  }
-}
-
-// 이벤트 타입별 메인 메시지
-function renderMessage(eventType: NotificationEventType, payload: string): string {
-  const p = parsePayload(payload)
-  if (!p) return payload
-
-  switch (eventType) {
-    case 'GAME_START': {
-      const home = p.homeTeam as string | undefined
-      const away = p.awayTeam as string | undefined
-      const startsIn = p.startsIn as string | undefined
-      if (home && away) return `${away} vs ${home} 경기가 ${startsIn ?? '곧'} 시작됩니다`
-      break
-    }
-    case 'TICKET_OPEN': {
-      const name = p.eventName as string | undefined
-      if (name) return `${name} 티켓 예매가 오픈되었습니다`
-      break
-    }
-    case 'PAYMENT_COMPLETED': {
-      const item = p.itemName as string | undefined
-      const amount = p.amount as number | undefined
-      if (item && amount != null) return `${item} 결제가 완료되었습니다 · ${amount.toLocaleString()}원`
-      if (item) return `${item} 결제가 완료되었습니다`
-      break
-    }
-    case 'CHAT_MENTION': {
-      const by = p.mentionedBy as string | undefined
-      const preview = p.preview as string | undefined
-      if (by && preview) return `${by}: ${preview}`
-      if (by) return `${by}님이 나를 멘션했습니다`
-      break
-    }
-  }
-  return payload
-}
-
-// 이벤트 타입별 서브 정보 (옵션)
-function renderSub(eventType: NotificationEventType, payload: string): string | null {
-  const p = parsePayload(payload)
-  if (!p) return null
-
-  switch (eventType) {
-    case 'GAME_START': {
-      const gameId = p.gameId as number | undefined
-      return gameId != null ? `경기 #${gameId}` : null
-    }
-    case 'TICKET_OPEN': {
-      const ticketId = p.ticketId as number | undefined
-      return ticketId != null ? `티켓 #${ticketId}` : null
-    }
-    case 'PAYMENT_COMPLETED': {
-      const orderId = p.orderId as number | undefined
-      return orderId != null ? `주문번호 #${orderId}` : null
-    }
-    case 'CHAT_MENTION': {
-      const roomId = p.roomId as number | undefined
-      return roomId != null ? `채팅방 #${roomId}` : null
-    }
-    default:
-      return null
-  }
-}
+import {
+  EVENT_LABEL,
+  EVENT_ICON,
+  EVENT_COLOR,
+  formatPayloadMessage,
+  formatPayloadSub,
+} from '../utils/notificationPayload'
 
 function formatTime(iso: string) {
   const d = new Date(iso)
@@ -142,10 +56,7 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
   return (
     <>
       {open && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 40,
-          background: 'rgba(0,0,0,0.4)',
-        }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.4)' }} />
       )}
       <div
         ref={drawerRef}
@@ -199,7 +110,7 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
           </div>
         </div>
 
-        {/* 알림 목록 */}
+        {/* 목록 */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {notifications.length === 0 ? (
             <div style={{
@@ -213,7 +124,7 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
           ) : (
             notifications.map((n) => {
               const color = EVENT_COLOR[n.eventType]
-              const sub = renderSub(n.eventType, n.payload)
+              const sub = formatPayloadSub(n.eventType, n.payload)
               return (
                 <div
                   key={n.id}
@@ -226,7 +137,6 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
                     display: 'flex', gap: 12, alignItems: 'flex-start',
                   }}
                 >
-                  {/* 아이콘 */}
                   <div style={{
                     width: 36, height: 36, borderRadius: 10, flexShrink: 0,
                     background: n.read ? C.elevated : `${color}22`,
@@ -237,7 +147,6 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
                     {EVENT_ICON[n.eventType]}
                   </div>
 
-                  {/* 본문 */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: n.read ? C.fg4 : color }}>
@@ -251,7 +160,7 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
                       fontSize: 13, color: n.read ? C.fg3 : C.fg1,
                       margin: 0, wordBreak: 'break-word', lineHeight: 1.5,
                     }}>
-                      {renderMessage(n.eventType, n.payload)}
+                      {formatPayloadMessage(n.eventType, n.payload)}
                     </p>
                     {sub && (
                       <p style={{ fontSize: 11, color: C.fg4, margin: '3px 0 0', lineHeight: 1 }}>
@@ -260,7 +169,6 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
                     )}
                   </div>
 
-                  {/* 읽지 않음 점 */}
                   {!n.read && (
                     <div style={{
                       width: 7, height: 7, borderRadius: '50%',

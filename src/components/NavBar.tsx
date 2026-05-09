@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { C } from '../styles/tokens'
-import { useNotifications, useNotificationStream } from '../hooks/useNotifications'
+import { useNotifications, useNotificationStream, requestBrowserNotificationPermission } from '../hooks/useNotifications'
 import { NotificationDrawer } from './NotificationDrawer'
+import { useAuthStore } from '../store/auth'
 
 const navItems = [
   { id: 'home',     label: '홈',     path: '/' },
@@ -16,8 +17,14 @@ export function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const accessToken = useAuthStore((s) => s.accessToken)
   const { data: notifications = [] } = useNotifications()
   useNotificationStream()
+
+  useEffect(() => {
+    if (!accessToken) return
+    requestBrowserNotificationPermission()
+  }, [accessToken])
 
   const unreadCount = notifications.filter((n) => !n.read).length
 

@@ -13,6 +13,28 @@ import {
 } from '../api/notifications'
 import { NotificationResponse, UpdateNotificationSettingRequest, RegisterChannelRequest } from '../types/api'
 import { useAuthStore } from '../store/auth'
+import { EVENT_LABEL, EVENT_ICON, formatPayloadMessage } from '../utils/notificationPayload'
+
+function sendBrowserNotification(n: NotificationResponse) {
+  if (typeof Notification === 'undefined') return
+  if (Notification.permission !== 'granted') return
+
+  const title = `${EVENT_ICON[n.eventType]} ${EVENT_LABEL[n.eventType]}`
+  const body = formatPayloadMessage(n.eventType, n.payload)
+
+  new Notification(title, {
+    body,
+    icon: '/logo.svg',
+    tag: String(n.id),    // 같은 tag면 중복 알림 대체
+  })
+}
+
+export async function requestBrowserNotificationPermission(): Promise<NotificationPermission> {
+  if (typeof Notification === 'undefined') return 'denied'
+  if (Notification.permission === 'granted') return 'granted'
+  if (Notification.permission === 'denied') return 'denied'
+  return Notification.requestPermission()
+}
 
 export const useNotifications = () => {
   const accessToken = useAuthStore((s) => s.accessToken)
@@ -109,6 +131,7 @@ export const useNotificationStream = () => {
           notification,
           ...prev,
         ])
+        sendBrowserNotification(notification)
       } catch {
         // ignore malformed event
       }
