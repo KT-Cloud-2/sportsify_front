@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px 24px; display:flex; gap:20px; }
+  .section { flex:1; }
+  .sec-title { font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#5DBBA0; margin-bottom:12px; }
+  .shadow-row { display:flex; gap:12px; }
+  .shadow-box { flex:1; height:52px; border-radius:8px; background:#1C2030; display:flex; align-items:center; justify-content:center; font-size:10px; color:#8B93B0; }
+  .radii-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .radius-box { width:52px; height:52px; background:#2A2F45; border:1px solid #3D4464; display:flex; align-items:center; justify-content:center; font-size:9px; color:#8B93B0; }
+</style></head><body>
+  <div class="section">
+    <div class="sec-title">Shadows</div>
+    <div class="shadow-row">
+      <div class="shadow-box" style="box-shadow:0 1px 3px rgba(0,0,0,0.4);">sm</div>
+      <div class="shadow-box" style="box-shadow:0 4px 16px rgba(0,0,0,0.5);">md</div>
+      <div class="shadow-box" style="box-shadow:0 8px 32px rgba(0,0,0,0.6);">lg</div>
+      <div class="shadow-box" style="box-shadow:0 0 20px rgba(93,187,160,0.25);border:1px solid rgba(93,187,160,0.3);color:#5DBBA0;">teal</div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Radii</div>
+    <div class="radii-row">
+      <div class="radius-box" style="border-radius:4px;">xs<br>4px</div>
+      <div class="radius-box" style="border-radius:8px;">sm<br>8px</div>
+      <div class="radius-box" style="border-radius:12px;">md<br>12px</div>
+      <div class="radius-box" style="border-radius:16px;">lg<br>16px</div>
+      <div class="radius-box" style="border-radius:9999px;width:64px;">pill</div>
+    </div>
+  </div>
+</body></html>

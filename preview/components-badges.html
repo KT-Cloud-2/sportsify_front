@@ -1,0 +1,38 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .badge { display:inline-flex; align-items:center; gap:5px; border-radius:9999px; padding:4px 10px; font-size:11px; font-weight:600; }
+  .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+</style></head><body>
+  <div class="row">
+    <span class="badge" style="background:rgba(93,187,160,0.15);color:#5DBBA0;border:1px solid rgba(93,187,160,0.3);">
+      <span class="dot" style="background:#5DBBA0;"></span>진행중
+    </span>
+    <span class="badge" style="background:rgba(62,207,142,0.12);color:#3ECF8E;border:1px solid rgba(62,207,142,0.25);">
+      <span class="dot" style="background:#3ECF8E;"></span>예매 가능
+    </span>
+    <span class="badge" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.25);">
+      <span class="dot" style="background:#EF4444;"></span>매진
+    </span>
+    <span class="badge" style="background:rgba(245,158,11,0.12);color:#F59E0B;border:1px solid rgba(245,158,11,0.25);">
+      <span class="dot" style="background:#F59E0B;"></span>마감 임박
+    </span>
+    <span class="badge" style="background:#2A2F45;color:#8B93B0;border:1px solid #3D4464;">종료</span>
+  </div>
+  <div class="row">
+    <span class="badge" style="background:#E8003D22;color:#E8003D;border:1px solid #E8003D44;">⚾ 야구</span>
+    <span class="badge" style="background:#1B6B3A22;color:#4ade80;border:1px solid #1B6B3A66;">⚽ 축구</span>
+    <span class="badge" style="background:#7B2FBE22;color:#c084fc;border:1px solid #7B2FBE44;">🎮 e스포츠</span>
+    <span class="badge" style="background:#1C2030;color:#5DBBA0;border:1px solid #3D4464;">NEW</span>
+    <span class="badge" style="background:#5DBBA0;color:#0E2421;">HOT</span>
+  </div>
+</body></html>

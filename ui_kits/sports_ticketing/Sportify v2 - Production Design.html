@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>Sportify v2 — Production Design</title>
+<style>
+  @font-face { font-family: 'NotoKR'; src: url('../../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Pretendard'; src: local('Pretendard'); font-display: swap; }
+  html, body { margin:0; padding:0; background:#0a0c14; color:#fff;
+    font-family: 'Pretendard','NotoKR','Noto Sans KR', system-ui, sans-serif;
+    font-feature-settings: "ss01","cv11"; }
+  * { box-sizing: border-box; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+  @keyframes fillBar { from{width:0} to{width:100%} }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2A2F45; border-radius: 8px; }
+</style>
+</head>
+<body data-screen-label="Sportify v2 Production Design">
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="sportify-v2-core.jsx"></script>
+<script type="text/babel" src="sportify-v2-flows.jsx"></script>
+<script type="text/babel" src="sportify-v2-meta.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { HomeV2, HomeV2Annotated, GameDetailV2, QueueScreen, QueueAnnotated } = window.SportifyV2Core;
+const { SeatScreen, PaymentScreen, PaymentResult, ChatScreen } = window.SportifyV2Flows;
+const { NotifSettingsV2, NotifInbox, MyPageV2, AdminGameMgmt, AdminDLQ } = window.SportifyV2Meta;
+
+function App() {
+  return (
+    <DCRoot title="Sportify v2 — Production Design" subtitle="Final UI for ticketing + queue + chat. Dark mode, 1440px desktop, all states + data bindings.">
+
+      <DCSection id="discovery" title="01 · Discovery — Home & Game Detail" subtitle="진입점. 라이벌 매치 시각 강조, skeleton/empty 포함, 실시간 잔여석 SSE 표시.">
+        <DCArtboard id="home-default" label="Home — Default" width={1440} height={900}><HomeV2 /></DCArtboard>
+        <DCArtboard id="home-skeleton" label="Home — Skeleton (loading)" width={1440} height={900}><HomeV2 skeleton /></DCArtboard>
+        <DCArtboard id="home-empty" label="Home — Empty (no upcoming games)" width={1440} height={900}><HomeV2 empty /></DCArtboard>
+        <DCArtboard id="home-annotated" label="Home — Annotated (data bindings + API)" width={1740} height={900}><HomeV2Annotated /></DCArtboard>
+        <DCArtboard id="gd-default" label="Game Detail — OPEN" width={1440} height={1100}><GameDetailV2 /></DCArtboard>
+        <DCArtboard id="gd-rival" label="Game Detail — RIVAL match" width={1440} height={1100}><GameDetailV2 rival /></DCArtboard>
+        <DCArtboard id="gd-scheduled" label="Game Detail — SCHEDULED (countdown)" width={1440} height={1100}><GameDetailV2 scheduled /></DCArtboard>
+        <DCArtboard id="gd-skeleton" label="Game Detail — Skeleton" width={1440} height={900}><GameDetailV2 skeleton /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="queue" title="02 · Queue — All States (highest UX risk)" subtitle="Redis Sorted Set + SSE. 5가지 상태 모두 설계: live · imminent · reconnecting · kicked · entering.">
+        <DCArtboard id="q-live"         label="Queue — Live (#247)"           width={1440} height={900}><QueueScreen state="live" /></DCArtboard>
+        <DCArtboard id="q-imminent"     label="Queue — Imminent (top 3)"      width={1440} height={900}><QueueScreen state="imminent" /></DCArtboard>
+        <DCArtboard id="q-reconnect"    label="Queue — SSE Reconnecting (30s grace)" width={1440} height={900}><QueueScreen state="reconnecting" /></DCArtboard>
+        <DCArtboard id="q-kicked"       label="Queue — Grace expired (kicked)" width={1440} height={900}><QueueScreen state="kicked" /></DCArtboard>
+        <DCArtboard id="q-entering"     label="Queue — Entering (redirect)"    width={1440} height={900}><QueueScreen state="entering" /></DCArtboard>
+        <DCArtboard id="q-annotated"    label="Queue — Annotated (SSE flow + interactions)" width={1820} height={900}><QueueAnnotated /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="booking" title="03 · Seat Selection & Payment" subtitle="좌석 선점은 15분 TTL. team_side로 구역 색 분리. 동시성 충돌 + 결제 idempotency 처리.">
+        <DCArtboard id="seat-default"  label="Seats — Default (2/4 selected)"  width={1440} height={1000}><SeatScreen /></DCArtboard>
+        <DCArtboard id="seat-conflict" label="Seats — 409 Conflict (snatched)" width={1440} height={1000}><SeatScreen state="conflict" /></DCArtboard>
+        <DCArtboard id="seat-timeout"  label="Seats — Session timeout"          width={1440} height={1000}><SeatScreen state="timeout" /></DCArtboard>
+        <DCArtboard id="pay-default"   label="Payment — Choose method"          width={1440} height={900}><PaymentScreen /></DCArtboard>
+        <DCArtboard id="pay-processing" label="Payment — Processing (idempotency)" width={1440} height={900}><PaymentScreen state="processing" /></DCArtboard>
+        <DCArtboard id="pay-success"   label="Payment — Success + ticket"       width={1440} height={900}><PaymentResult kind="success" /></DCArtboard>
+        <DCArtboard id="pay-fail"      label="Payment — PG failure"             width={1440} height={900}><PaymentResult kind="fail" /></DCArtboard>
+        <DCArtboard id="pay-timeout"   label="Payment — 15-min timeout"         width={1440} height={900}><PaymentResult kind="timeout" /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="chat" title="04 · Fan Chat" subtitle="WebSocket STOMP. CHEER 메시지 · @mention · 응원 강도 미터 · in-room/per-row notification toggle.">
+        <DCArtboard id="chat-live"   label="Chat — Live (game room with intensity)" width={1440} height={900}><ChatScreen /></DCArtboard>
+        <DCArtboard id="chat-discon" label="Chat — WebSocket disconnected"           width={1440} height={900}><ChatScreen state="disconnected" /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="notifications" title="05 · Notifications — Two-Layer Settings ★" subtitle="Layer 1 (notification_settings, master) ↔ Layer 2 (chat_participants.notification_enabled, per-room). 의존 관계가 시각적으로 명확.">
+        <DCArtboard id="notif-on"     label="Settings — Master ON (both layers active)"  width={1440} height={1500}><NotifSettingsV2 /></DCArtboard>
+        <DCArtboard id="notif-off"    label="Settings — chat_mention OFF (Section B disabled) ★" width={1440} height={1500}><NotifSettingsV2 masterOff /></DCArtboard>
+        <DCArtboard id="inbox-full"   label="Inbox — Full page with filters"             width={1440} height={900}><NotifInbox /></DCArtboard>
+        <DCArtboard id="inbox-empty"  label="Inbox — Empty state"                        width={1440} height={900}><NotifInbox empty /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="account" title="06 · My Page" subtitle="Profile · Tickets (with QR) · Favorite teams (drag-reorder) · Payment history · Login activity · Danger zone.">
+        <DCArtboard id="my-tickets"  label="My Page — Tickets + QR detail"     width={1440} height={1100}><MyPageV2 tab="tickets" /></DCArtboard>
+        <DCArtboard id="my-teams"    label="My Page — Favorite teams (reorder)" width={1440} height={900}><MyPageV2 tab="teams" /></DCArtboard>
+        <DCArtboard id="my-payments" label="My Page — Payment history"          width={1440} height={900}><MyPageV2 tab="payments" /></DCArtboard>
+        <DCArtboard id="my-danger"   label="My Page — Danger zone (withdraw)"   width={1440} height={1000}><MyPageV2 tab="danger" /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="admin" title="07 · Admin Panels" subtitle="운영자 전용. 경기 상태 전이 + 좌석 일괄 생성 + 알림 DLQ 재시도.">
+        <DCArtboard id="admin-games" label="Admin — Game management + bulk seat creation" width={1440} height={1300}><AdminGameMgmt /></DCArtboard>
+        <DCArtboard id="admin-dlq"   label="Admin — Notification DLQ monitor"             width={1440} height={1000}><AdminDLQ /></DCArtboard>
+      </DCSection>
+
+    </DCRoot>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

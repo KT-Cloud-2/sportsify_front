@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Sportify — Full Design</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{height:100%}
+    body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="ui_kits/sports_ticketing/design-canvas.jsx"></script>
+<script type="text/babel" src="ui_kits/sports_ticketing/sportify-screens.jsx"></script>
+<script type="text/babel">
+  const { DesignCanvas, DCSection, DCArtboard } = window;
+  const S = window.SportifyScreens;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <DesignCanvas title="Sportify — Full Design" subtitle="Login · Game Detail · Notifications · My Page · States · Mobile · Annotations">
+
+      <DCSection id="auth" title="01 — Authentication" subtitle="OAuth2 social login + JWT loading">
+        <DCArtboard id="login-dark" label="Login (Dark)" width={1280} height={800}><S.LoginScreen mode="dark" /></DCArtboard>
+        <DCArtboard id="login-light" label="Login (Light)" width={1280} height={800}><S.LoginScreen mode="light" /></DCArtboard>
+        <DCArtboard id="login-loading" label="JWT Redirect Loading" width={1280} height={800}><S.LoginLoading /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="discovery" title="02 — Game Detail" subtitle="From home card → game info + seat grade summary + queue CTA">
+        <DCArtboard id="game-detail" label="Game Detail (On-sale)" width={1280} height={1000}><S.GameDetail status="OPEN" /></DCArtboard>
+        <DCArtboard id="game-detail-upcoming" label="Game Detail (Upcoming · countdown)" width={1280} height={1000}><S.GameDetail status="UPCOMING" /></DCArtboard>
+        <DCArtboard id="game-detail-annotated" label="Annotated · component callouts" width={1340} height={1000}><S.GameDetailAnnotated /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="realtime" title="03 — Notification Center" subtitle="Bell dropdown · header-anchored panel">
+        <DCArtboard id="bell-dropdown" label="Bell dropdown — unread" width={1280} height={760}><S.BellDropdown unread /></DCArtboard>
+        <DCArtboard id="bell-dropdown-empty" label="Bell dropdown — empty" width={1280} height={760}><S.BellDropdown unread={false} empty /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="personal" title="04 — My Page" subtitle="Profile · favorite teams · ticket history">
+        <DCArtboard id="mypage" label="My Page" width={1280} height={1100}><S.MyPage /></DCArtboard>
+        <DCArtboard id="mypage-empty" label="My Page — no favorites yet" width={1280} height={900}><S.MyPage empty /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="states" title="05 — Empty &amp; Error states" subtitle="Edge cases for queue, payment, seat, chat">
+        <DCArtboard id="empty-games" label="No upcoming games" width={620} height={520}><S.EmptyState kind="games" /></DCArtboard>
+        <DCArtboard id="empty-notif" label="No notifications" width={620} height={520}><S.EmptyState kind="notif" /></DCArtboard>
+        <DCArtboard id="empty-chat" label="Empty chat room" width={620} height={520}><S.EmptyState kind="chat" /></DCArtboard>
+        <DCArtboard id="loading-queue" label="Queue position loading" width={620} height={520}><S.EmptyState kind="loading" /></DCArtboard>
+        <DCArtboard id="error-payment" label="Payment failure" width={620} height={520}><S.ErrorState kind="payment" /></DCArtboard>
+        <DCArtboard id="error-timeout" label="Queue timeout (kicked)" width={620} height={520}><S.ErrorState kind="timeout" /></DCArtboard>
+        <DCArtboard id="error-seat-taken" label="Seat already taken" width={620} height={520}><S.ErrorState kind="seat" /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="mobile" title="06 — Mobile / Tablet breakpoints" subtitle="Tablet 768 · Mobile 390">
+        <DCArtboard id="mobile-home" label="Home — Mobile 390" width={390} height={800}><S.MobileHome /></DCArtboard>
+        <DCArtboard id="mobile-queue" label="Queue — Mobile 390" width={390} height={800}><S.MobileQueue /></DCArtboard>
+        <DCArtboard id="mobile-chat" label="Chat — Mobile 390" width={390} height={800}><S.MobileChat /></DCArtboard>
+        <DCArtboard id="tablet-home" label="Home — Tablet 768" width={768} height={1024}><S.TabletHome /></DCArtboard>
+      </DCSection>
+
+      <DCSection id="annotations" title="07 — Component annotations &amp; interaction notes" subtitle="Hover · transition · loading · responsive notes">
+        <DCArtboard id="annot-home" label="Home — annotated" width={1340} height={900}><S.HomeAnnotated /></DCArtboard>
+        <DCArtboard id="annot-queue" label="Queue — annotated &amp; SSE flow" width={1100} height={900}><S.QueueAnnotated /></DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+</script>
+</body>
+</html>

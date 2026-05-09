@@ -1,0 +1,43 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px 24px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .row:last-child { margin-bottom:0; }
+  button { font-family:'Noto Sans KR',sans-serif; font-weight:600; cursor:pointer; border:none; transition:all 150ms; }
+  .btn-primary { background:#5DBBA0; color:#0E2421; border-radius:9999px; padding:10px 20px; font-size:14px; }
+  .btn-secondary { background:transparent; color:#5DBBA0; border:1.5px solid #5DBBA0; border-radius:9999px; padding:9px 20px; font-size:14px; }
+  .btn-ghost { background:#1C2030; color:#C8CCDA; border-radius:9999px; padding:10px 20px; font-size:14px; border:1px solid #2A2F45; }
+  .btn-danger { background:#EF4444; color:#fff; border-radius:9999px; padding:10px 20px; font-size:14px; }
+  .btn-sm { padding:6px 14px; font-size:12px; border-radius:9999px; background:#5DBBA0; color:#0E2421; font-weight:600; }
+  .btn-lg { padding:14px 28px; font-size:16px; border-radius:9999px; background:#5DBBA0; color:#0E2421; font-weight:700; }
+  .btn-disabled { background:#2A2F45; color:#5A6280; border-radius:9999px; padding:10px 20px; font-size:14px; cursor:not-allowed; }
+  .btn-baseball { background:#E8003D; color:#fff; border-radius:9999px; padding:10px 20px; font-size:14px; font-weight:700; }
+  .btn-esports { background:#7B2FBE; color:#fff; border-radius:9999px; padding:10px 20px; font-size:14px; font-weight:700; }
+  .label { font-size:9px; color:#5A6280; text-align:center; margin-top:4px; }
+  .col { display:flex; flex-direction:column; align-items:center; }
+</style></head><body>
+  <div class="row">
+    <div class="col"><button class="btn-primary">티켓 예매</button><div class="label">Primary</div></div>
+    <div class="col"><button class="btn-secondary">더 보기</button><div class="label">Secondary</div></div>
+    <div class="col"><button class="btn-ghost">취소</button><div class="label">Ghost</div></div>
+    <div class="col"><button class="btn-danger">삭제</button><div class="label">Danger</div></div>
+    <div class="col"><button class="btn-disabled" disabled>매진</button><div class="label">Disabled</div></div>
+  </div>
+  <div class="row">
+    <div class="col"><button class="btn-sm">Small</button><div class="label">sm</div></div>
+    <div class="col"><button class="btn-primary">Medium</button><div class="label">md</div></div>
+    <div class="col"><button class="btn-lg">Large 예매하기</button><div class="label">lg</div></div>
+  </div>
+  <div class="row">
+    <div class="col"><button class="btn-baseball">⚾ 야구</button><div class="label">Baseball</div></div>
+    <div class="col"><button class="btn-esports">🎮 e스포츠</button><div class="label">E-Sports</div></div>
+  </div>
+</body></html>

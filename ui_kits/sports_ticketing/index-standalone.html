@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sportify — UI Kit</title>
+  <meta name="ext-resource-dependency" content="../../assets/logo.svg" data-resource-id="logoSvg" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+
+  <template id="__bundler_thumbnail" data-bg-color="#171A2C">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="#171A2C"/>
+      <!-- Ticket card shapes -->
+      <rect x="24" y="60" width="152" height="36" rx="8" fill="#1C2030" stroke="#3D4464" stroke-width="1"/>
+      <rect x="24" y="104" width="152" height="36" rx="8" fill="#1C2030" stroke="#3D4464" stroke-width="1"/>
+      <rect x="24" y="148" width="72" height="36" rx="8" fill="#5DBBA0" opacity="0.9"/>
+      <!-- Teal accent circle -->
+      <circle cx="158" cy="42" r="22" fill="none" stroke="#5DBBA0" stroke-width="3" opacity="0.7"/>
+      <circle cx="158" cy="42" r="10" fill="#5DBBA0" opacity="0.5"/>
+      <!-- Sport icons placeholder -->
+      <rect x="32" y="68" width="20" height="20" rx="4" fill="#E8003D" opacity="0.8"/>
+      <rect x="32" y="112" width="20" height="20" rx="4" fill="#1B6B3A" opacity="0.8"/>
+    </svg>
+  </template>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body,#root { height:100%; }
+    body { font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif; background:#171A2C; color:#fff; -webkit-font-smoothing:antialiased; }
+    ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:#1C2030; } ::-webkit-scrollbar-thumb { background:#3D4464; border-radius:3px; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    @keyframes queuePulse { 0%,100%{box-shadow:0 0 0 0 rgba(93,187,160,0.4)} 50%{box-shadow:0 0 0 12px rgba(93,187,160,0)} }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── TOKENS ── */
+const C = {
+  dark:'#171A2C', card:'#1C2030', elevated:'#2A2F45',
+  teal:'#5DBBA0', tealBlue:'#4EA8A9', tealLight:'#DBF9E8', tealDim:'#3D8C7E', deep:'#0E2421',
+  red:'#E8003D', green:'#1B6B3A', orange:'#F97316', purple:'#7B2FBE',
+  border:'#3D4464', fg1:'#FFFFFF', fg2:'#C8CCDA', fg3:'#8B93B0', fg4:'#5A6280',
+  success:'#3ECF8E', warning:'#F59E0B', error:'#EF4444', info:'#3B82F6',
+};
+
+/* ── ATOMS ── */
+function Badge({ children, variant='teal', style={} }) {
+  const v = {
+    teal:    {bg:'rgba(93,187,160,0.15)',  color:C.teal,    bd:'rgba(93,187,160,0.3)'},
+    green:   {bg:'rgba(62,207,142,0.12)',  color:C.success, bd:'rgba(62,207,142,0.25)'},
+    red:     {bg:'rgba(239,68,68,0.12)',   color:C.error,   bd:'rgba(239,68,68,0.25)'},
+    yellow:  {bg:'rgba(245,158,11,0.12)',  color:C.warning, bd:'rgba(245,158,11,0.25)'},
+    gray:    {bg:C.elevated,              color:C.fg3,     bd:C.border},
+    baseball:{bg:'rgba(232,0,61,0.15)',   color:'#ff8fa3', bd:'rgba(232,0,61,0.3)'},
+    soccer:  {bg:'rgba(27,107,58,0.2)',   color:'#4ade80', bd:'rgba(27,107,58,0.4)'},
+    basketball:{bg:'rgba(249,115,22,0.15)',color:'#fdba74', bd:'rgba(249,115,22,0.3)'},
+    esports: {bg:'rgba(123,47,190,0.2)',  color:'#c084fc', bd:'rgba(123,47,190,0.35)'},
+    solid:   {bg:C.teal,                  color:C.deep,    bd:C.teal},
+  }[variant]||{bg:C.elevated,color:C.fg3,bd:C.border};
+  return <span style={{display:'inline-flex',alignItems:'center',gap:5,borderRadius:9999,padding:'3px 10px',fontSize:11,fontWeight:600,background:v.bg,color:v.color,border:`1px solid ${v.bd}`,...style}}>{children}</span>;
+}
+
+function Btn({ children, variant='primary', size='md', onClick, disabled, style={} }) {
+  const sz = {sm:{padding:'6px 14px',fontSize:12},md:{padding:'10px 20px',fontSize:14},lg:{padding:'13px 28px',fontSize:16}}[size]||{padding:'10px 20px',fontSize:14};
+  const v = {
+    primary:  {background:C.teal,    color:C.deep,  border:'none'},
+    secondary:{background:'transparent',color:C.teal,border:`1.5px solid ${C.teal}`},
+    ghost:    {background:C.card,    color:C.fg2,   border:`1px solid ${C.border}`},
+    danger:   {background:C.error,   color:'#fff',  border:'none'},
+    red:      {background:C.red,     color:'#fff',  border:'none'},
+    orange:   {background:C.orange,  color:'#fff',  border:'none'},
+    purple:   {background:C.purple,  color:'#fff',  border:'none'},
+  }[variant]||{background:C.teal,color:C.deep,border:'none'};
+  return <button onClick={onClick} disabled={disabled} style={{fontFamily:'inherit',fontWeight:600,cursor:disabled?'not-allowed':'pointer',borderRadius:9999,border:v.border,background:disabled?C.elevated:v.background,color:disabled?C.fg4:v.color,transition:'all 150ms',lineHeight:1,...sz,...style}}>{children}</button>;
+}
+
+function Toggle({ value, onChange }) {
+  return (
+    <div onClick={() => onChange(!value)} style={{width:44,height:24,borderRadius:9999,background:value?C.teal:C.elevated,border:`1px solid ${value?C.teal:C.border}`,cursor:'pointer',position:'relative',transition:'all 200ms',flexShrink:0}}>
+      <div style={{position:'absolute',top:3,left:value?22:3,width:16,height:16,borderRadius:'50%',background:value?C.deep:'#fff',transition:'left 200ms'}}></div>
+    </div>
+  );
+}
+
+/* ── DATA ── */
+const sportMeta = {
+  BASEBALL:   {label:'야구',   icon:'⚾', color:C.red,    badge:'baseball',   kt:'KT Wiz'},
+  SOCCER:     {label:'축구',   icon:'⚽', color:C.green,  badge:'soccer',     kt:'수원 FC'},
+  BASKETBALL: {label:'농구',   icon:'🏀', color:C.orange, badge:'basketball', kt:'KT 소닉붐'},
+};
+
+const matches = [
+  {id:1, sport:'BASEBALL',   home:'KT Wiz',       away:'두산 베어스', date:'2025.06.15', time:'18:30', venue:'수원KT위즈파크',    price:25000, seats:142, status:'OPEN'},
+  {id:2, sport:'BASEBALL',   home:'KT Wiz',       away:'LG 트윈스',  date:'2025.06.18', time:'19:00', venue:'수원KT위즈파크',    price:30000, seats:8,   status:'OPEN'},
+  {id:3, sport:'SOCCER',     home:'수원 FC',      away:'전북 현대',  date:'2025.06.20', time:'20:00', venue:'수원월드컵경기장',  price:18000, seats:330, status:'OPEN'},
+  {id:4, sport:'SOCCER',     home:'수원 삼성',    away:'울산 HD',   date:'2025.06.22', time:'16:00', venue:'수원월드컵경기장',  price:20000, seats:0,   status:'SCHEDULED'},
+  {id:5, sport:'BASKETBALL', home:'KT 소닉붐',    away:'현대모비스', date:'2025.06.24', time:'19:00', venue:'수원KT아레나',      price:22000, seats:88,  status:'OPEN'},
+  {id:6, sport:'BASKETBALL', home:'KT 소닉붐',    away:'서울 삼성',  date:'2025.06.27', time:'18:00', venue:'수원KT아레나',      price:22000, seats:210, status:'OPEN'},
+];
+
+const myTickets = [
+  {id:'KTS-84601', sport:'BASEBALL',   match:'KT Wiz vs 두산',   date:'2025.05.20', seat:'1루측 C4', price:25000, status:'USED'},
+  {id:'KTS-84720', sport:'SOCCER',     match:'수원 FC vs 전북',  date:'2025.06.20', seat:'3루측 A7', price:18000, status:'CONFIRMED'},
+  {id:'KTS-84721', sport:'BASEBALL',   match:'KT Wiz vs 두산',  date:'2025.06.15', seat:'1루측 B3', price:25000, status:'CONFIRMED'},
+  {id:'KTS-84600', sport:'BASKETBALL', match:'KT 소닉붐 vs 모비스',date:'2025.04.10',seat:'VIP D2',  price:35000, status:'CANCELLED'},
+];
+
+/* ── NAV ── */
+function NavBar({ screen, setScreen }) {
+  const items = [{id:'home',label:'홈'},{id:'mytickets',label:'내 티켓'},{id:'chat',label:'팀 채팅'},{id:'notifications',label:'알림 설정'},{id:'admin',label:'대시보드'}];
+  return (
+    <nav style={{position:'sticky',top:0,zIndex:100,background:'rgba(23,26,44,0.96)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.border}`,display:'flex',alignItems:'center',padding:'0 28px',height:58,gap:28}}>
+      <div style={{display:'flex',alignItems:'center',gap:10,marginRight:12,cursor:'pointer'}} onClick={()=>setScreen('home')}>
+        <img src={window.__resources && window.__resources.logoSvg ? window.__resources.logoSvg : "../../assets/logo.svg"} width="30" height="28" alt="logo" />
+        <span style={{fontWeight:800,fontSize:16,color:C.teal,letterSpacing:'-0.02em'}}>Sportify</span>
+      </div>
+      {items.map(it => (
+        <button key={it.id} onClick={()=>setScreen(it.id)} style={{background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:13,fontWeight:['home','detail','queue','seat','checkout'].includes(screen)&&it.id==='home'?700:screen===it.id?700:500,color:(['home','detail','queue','seat','checkout'].includes(screen)&&it.id==='home')||screen===it.id?C.teal:C.fg3,padding:'0 2px',height:'100%',borderBottom:(['home','detail','queue','seat','checkout'].includes(screen)&&it.id==='home')||screen===it.id?`2px solid ${C.teal}`:'2px solid transparent',transition:'all 150ms'}}>
+          {it.label}
+        </button>
+      ))}
+      <div style={{marginLeft:'auto',display:'flex',gap:10,alignItems:'center'}}>
+        <Badge variant="green"><span style={{width:6,height:6,borderRadius:'50%',background:C.success,display:'inline-block'}}></span> 라이브</Badge>
+        <div style={{width:32,height:32,borderRadius:'50%',background:C.elevated,border:`2px solid ${C.teal}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:C.teal,cursor:'pointer'}}>K</div>
+      </div>
+    </nav>
+  );
+}
+
+/* ── HOME ── */
+function HomeScreen({ setScreen, setMatch }) {
+  const [filter, setFilter] = useState('ALL');
+  const sports = [{id:'ALL',label:'전체'},{id:'BASEBALL',label:'⚾ 야구'},{id:'SOCCER',label:'⚽ 축구'},{id:'BASKETBALL',label:'🏀 농구'}];
+  const filtered = filter==='ALL' ? matches : matches.filter(m=>m.sport===filter);
+  return (
+    <div style={{maxWidth:1100,margin:'0 auto',padding:'28px 28px'}}>
+      <div style={{background:`linear-gradient(135deg, ${C.deep}, #1a2840)`,border:`1px solid ${C.border}`,borderRadius:16,padding:'36px 44px',marginBottom:36,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',right:0,top:0,bottom:0,width:'40%',background:'linear-gradient(90deg,transparent,rgba(93,187,160,0.04))'}}></div>
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:'0.1em',color:C.teal,textTransform:'uppercase',marginBottom:8}}>2025 시즌 · SPORTIFY</div>
+        <h1 style={{fontSize:32,fontWeight:800,letterSpacing:'-0.03em',marginBottom:10,lineHeight:1.2}}>야구 · 축구 · 농구<br />한 곳에서 예매하세요</h1>
+        <p style={{color:C.fg3,fontSize:14,marginBottom:22}}>실시간 대기열 · 좌석 선택 · 결제까지 원스톱</p>
+        <div style={{display:'flex',gap:10}}>
+          <Btn size="lg" onClick={()=>{ setMatch(matches[0]); setScreen('queue'); }}>대기열 입장 체험</Btn>
+          <Btn variant="secondary" size="lg">경기 일정 보기</Btn>
+        </div>
+        <div style={{position:'absolute',right:48,top:'50%',transform:'translateY(-50%)',fontSize:64,opacity:.08}}>🏟️</div>
+      </div>
+      <div style={{display:'flex',gap:8,marginBottom:24}}>
+        {sports.map(s=>(
+          <button key={s.id} onClick={()=>setFilter(s.id)} style={{fontFamily:'inherit',cursor:'pointer',padding:'7px 16px',borderRadius:9999,fontSize:13,fontWeight:600,background:filter===s.id?C.teal:C.card,color:filter===s.id?C.deep:C.fg3,border:`1px solid ${filter===s.id?C.teal:C.border}`,transition:'all 150ms'}}>{s.label}</button>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14}}>
+        {filtered.map(m=><MatchCard key={m.id} match={m} onClick={()=>{ setMatch(m); setScreen('queue'); }} />)}
+      </div>
+    </div>
+  );
+}
+
+function MatchCard({ match, onClick }) {
+  const [hov, setHov] = useState(false);
+  const sm = sportMeta[match.sport];
+  const avail = match.status==='OPEN' && match.seats>0;
+  return (
+    <div onClick={avail?onClick:undefined} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      style={{background:C.card,border:`1px solid ${hov&&avail?C.teal:C.border}`,borderRadius:12,overflow:'hidden',cursor:avail?'pointer':'default',transition:'all 200ms',boxShadow:hov&&avail?`0 0 20px rgba(93,187,160,0.12)`:'none',opacity:avail?1:0.6}}>
+      <div style={{background:`linear-gradient(135deg,${sm.color}18,${sm.color}33)`,padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:`1px solid ${sm.color}33`}}>
+        <span style={{fontSize:26}}>{sm.icon}</span>
+        <Badge variant={sm.badge}>{sm.label}</Badge>
+      </div>
+      <div style={{padding:'12px 16px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+          <span style={{fontWeight:700,fontSize:14}}>{match.home}</span>
+          <span style={{color:C.fg4,fontSize:11}}>vs</span>
+          <span style={{fontWeight:700,fontSize:14}}>{match.away}</span>
+        </div>
+        <div style={{fontSize:12,color:C.fg3,marginBottom:3}}>📅 {match.date} · {match.time}</div>
+        <div style={{fontSize:12,color:C.fg3,marginBottom:12}}>📍 {match.venue}</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontSize:17,fontWeight:800,color:C.teal}}>₩{match.price.toLocaleString()}~</div>
+            {avail && <div style={{fontSize:10,color:C.fg4}}>잔여 {match.seats}석</div>}
+          </div>
+          <Badge variant={match.seats===0?'gray':match.seats<20?'yellow':'green'}>
+            {match.seats===0?'매진':match.seats<20?'마감 임박':'예매 가능'}
+          </Badge>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── QUEUE SCREEN ── */
+function QueueScreen({ match, setScreen }) {
+  const [position, setPosition] = useState(247);
+  const [total, setTotal] = useState(1843);
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    if (entered) return;
+    const t = setInterval(() => {
+      setPosition(p => {
+        if (p <= 1) { clearInterval(t); setEntered(true); return 0; }
+        return p - Math.floor(Math.random()*3+1);
+      });
+      setTotal(t => Math.max(t - Math.floor(Math.random()*5+2), position));
+    }, 1200);
+    return () => clearInterval(t);
+  }, [entered]);
+
+  const pct = Math.max(0, Math.min(100, Math.round((1 - position/total)*100)));
+  const sm = sportMeta[match.sport];
+
+  if (entered) return (
+    <div style={{maxWidth:480,margin:'80px auto',padding:'0 28px',textAlign:'center',animation:'fadeIn 0.4s ease'}}>
+      <div style={{width:80,height:80,borderRadius:'50%',background:`rgba(93,187,160,0.15)`,border:`2px solid ${C.teal}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,margin:'0 auto 20px',boxShadow:`0 0 32px rgba(93,187,160,0.3)`}}>✅</div>
+      <h2 style={{fontSize:22,fontWeight:800,marginBottom:8}}>입장 가능합니다!</h2>
+      <p style={{color:C.fg3,fontSize:14,marginBottom:28}}>좌석 선택 화면으로 이동합니다. 예매 유효 시간: <strong style={{color:C.warning}}>15분</strong></p>
+      <Btn size="lg" onClick={()=>setScreen('seat')}>좌석 선택하기 →</Btn>
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:520,margin:'0 auto',padding:'40px 28px'}}>
+      <button onClick={()=>setScreen('home')} style={{background:'none',border:'none',cursor:'pointer',color:C.fg3,fontFamily:'inherit',fontSize:13,marginBottom:28,padding:0}}>← 홈으로</button>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:32,textAlign:'center'}}>
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:'0.08em',color:C.fg4,textTransform:'uppercase',marginBottom:16}}>실시간 대기열</div>
+        <div style={{fontSize:13,color:C.fg3,marginBottom:6}}>{sm.icon} {match.home} vs {match.away} · {match.date}</div>
+
+        {/* Position display */}
+        <div style={{margin:'24px 0',position:'relative'}}>
+          <div style={{width:120,height:120,borderRadius:'50%',border:`3px solid ${C.border}`,margin:'0 auto',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',animation:'queuePulse 2s infinite'}}>
+            <div style={{position:'absolute',inset:0,borderRadius:'50%',border:`3px solid ${C.teal}`,clipPath:`inset(0 ${100-pct}% 0 0 round 50%)`,transition:'all 1s ease'}}></div>
+            <div style={{fontSize:36,fontWeight:800,color:C.teal,lineHeight:1}}>{position.toLocaleString()}</div>
+            <div style={{fontSize:11,color:C.fg3}}>대기 순번</div>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{background:C.elevated,borderRadius:9999,height:6,margin:'0 0 12px',overflow:'hidden'}}>
+          <div style={{height:'100%',background:C.teal,borderRadius:9999,width:`${pct}%`,transition:'width 1s ease'}}></div>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:C.fg4,marginBottom:24}}>
+          <span>전체 대기: {total.toLocaleString()}명</span>
+          <span>진행률: {pct}%</span>
+        </div>
+
+        <div style={{background:C.elevated,borderRadius:10,padding:'12px 16px',marginBottom:20,display:'flex',justifyContent:'space-between',fontSize:13}}>
+          <span style={{color:C.fg3}}>예상 대기 시간</span>
+          <span style={{fontWeight:700,color:C.warning}}>약 {Math.ceil(position/15)}분</span>
+        </div>
+
+        <div style={{fontSize:12,color:C.fg4,lineHeight:1.6,background:C.elevated,borderRadius:8,padding:'10px 14px',textAlign:'left'}}>
+          💡 창을 닫아도 <strong style={{color:C.fg3}}>30초 이내 재접속</strong>하면 순번이 유지됩니다.<br/>
+          인당 최대 <strong style={{color:C.fg3}}>{match.seats > 0 ? 4 : 0}매</strong>까지 구매 가능합니다.
+        </div>
+
+        <button onClick={()=>setScreen('home')} style={{marginTop:20,background:'none',border:'none',cursor:'pointer',color:C.fg4,fontFamily:'inherit',fontSize:12}}>대기열 취소 (이탈)</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── SEAT SCREEN ── */
+const seatRows = ['A','B','C','D','E','F','G','H'];
+const soldSeats = ['A1','A3','B2','B6','C1','D3','D7','E2','F5','G1','H2','H8'];
+const reservedSeats = ['A2','B4','C7','D1','E5','F3'];
+
+function SeatScreen({ match, setScreen }) {
+  const [selected, setSelected] = useState([]);
+  const [zone, setZone] = useState('1루측');
+  const zones = ['1루측','3루측','외야','VIP'];
+  const sm = sportMeta[match.sport];
+  const zp = {'1루측':match.price,'3루측':Math.round(match.price*.85),'외야':Math.round(match.price*.6),'VIP':match.price*2};
+
+  const toggle = (seat) => {
+    if (soldSeats.includes(seat)||reservedSeats.includes(seat)) return;
+    setSelected(p => p.includes(seat)?p.filter(s=>s!==seat):p.length<4?[...p,seat]:p);
+  };
+  const st = (s) => soldSeats.includes(s)?'sold':reservedSeats.includes(s)?'reserved':selected.includes(s)?'selected':'free';
+  const sc = {free:C.elevated,sold:'#1a1a24',reserved:'#2a1a3a',selected:C.teal};
+  const tc = {free:C.fg4,sold:'#3a3a4a',reserved:'#5a3a6a',selected:C.deep};
+
+  return (
+    <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 28px'}}>
+      <button onClick={()=>setScreen('queue')} style={{background:'none',border:'none',cursor:'pointer',color:C.fg3,fontFamily:'inherit',fontSize:13,marginBottom:18,padding:0}}>← 대기열</button>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:20}}>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:22}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:18}}>
+            <span style={{fontSize:24}}>{sm.icon}</span>
+            <div>
+              <h2 style={{fontSize:16,fontWeight:700}}>{match.home} <span style={{color:C.fg4,fontWeight:400}}>vs</span> {match.away}</h2>
+              <p style={{fontSize:11,color:C.fg3}}>{match.date} {match.time} · {match.venue}</p>
+            </div>
+            <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:6,fontSize:12,color:C.warning,background:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:8,padding:'4px 10px'}}>
+              ⏱ 잔여 <strong>13:42</strong>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:7,marginBottom:18}}>
+            {zones.map(z=>(
+              <button key={z} onClick={()=>setZone(z)} style={{fontFamily:'inherit',cursor:'pointer',fontSize:11,fontWeight:600,padding:'5px 12px',borderRadius:9999,background:zone===z?C.teal:C.elevated,color:zone===z?C.deep:C.fg3,border:`1px solid ${zone===z?C.teal:C.border}`,transition:'all 150ms'}}>{z} ₩{Math.round(zp[z]/1000)}K</button>
+            ))}
+          </div>
+          <div style={{background:'linear-gradient(180deg,rgba(93,187,160,0.08),transparent)',border:`2px solid ${C.teal}44`,borderRadius:'44% 44% 0 0',textAlign:'center',padding:'7px 0',marginBottom:14,fontSize:10,color:C.teal,fontWeight:600}}>— 필드 / FIELD —</div>
+          <div style={{display:'flex',flexDirection:'column',gap:5}}>
+            {seatRows.map(row=>(
+              <div key={row} style={{display:'flex',gap:5,alignItems:'center'}}>
+                <span style={{fontSize:9,color:C.fg4,width:14,textAlign:'center'}}>{row}</span>
+                {Array.from({length:10},(_,i)=>{
+                  const seat=`${row}${i+1}`, s=st(seat);
+                  return <div key={seat} onClick={()=>toggle(seat)} style={{width:30,height:26,borderRadius:4,background:sc[s],color:tc[s],display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:600,cursor:s==='free'?'pointer':'default',border:s==='selected'?`1.5px solid ${C.teal}`:`1px solid ${C.border}`,transition:'all 100ms',boxShadow:s==='selected'?`0 0 8px rgba(93,187,160,0.4)`:'none'}}>{i+1}</div>;
+                })}
+              </div>
+            ))}
+          </div>
+          <div style={{display:'flex',gap:14,marginTop:14}}>
+            {[['free','선택 가능'],['selected','선택됨'],['reserved','예약중'],['sold','매진']].map(([s,l])=>(
+              <div key={s} style={{display:'flex',alignItems:'center',gap:5}}>
+                <div style={{width:12,height:10,borderRadius:2,background:sc[s],border:`1px solid ${C.border}`}}></div>
+                <span style={{fontSize:9,color:C.fg3}}>{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18,position:'sticky',top:72,alignSelf:'start'}}>
+          <h3 style={{fontSize:14,fontWeight:700,marginBottom:14}}>주문 요약</h3>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:11,color:C.fg3,marginBottom:3}}>구역</div>
+            <div style={{fontWeight:600,fontSize:13}}>{zone} — ₩{zp[zone].toLocaleString()}/석</div>
+          </div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11,color:C.fg3,marginBottom:6}}>선택 좌석 ({selected.length}/4)</div>
+            {selected.length===0?(
+              <div style={{fontSize:12,color:C.fg4,padding:10,background:C.elevated,borderRadius:8,textAlign:'center'}}>좌석을 선택해 주세요</div>
+            ):(
+              <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                {selected.map(s=><span key={s} style={{background:'rgba(93,187,160,0.12)',color:C.teal,border:'1px solid rgba(93,187,160,0.3)',borderRadius:6,padding:'3px 8px',fontSize:12,fontWeight:700}}>{s}</span>)}
+              </div>
+            )}
+          </div>
+          <div style={{borderTop:`1px solid ${C.border}`,paddingTop:12,marginBottom:14}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+              <span style={{fontSize:12,color:C.fg3}}>소계</span>
+              <span style={{fontSize:12}}>₩{(zp[zone]*selected.length).toLocaleString()}</span>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',marginTop:8}}>
+              <span style={{fontSize:14,fontWeight:700}}>합계</span>
+              <span style={{fontSize:19,fontWeight:800,color:C.teal}}>₩{(zp[zone]*selected.length).toLocaleString()}</span>
+            </div>
+          </div>
+          <Btn size="lg" disabled={selected.length===0} style={{width:'100%',borderRadius:10}} onClick={()=>setScreen('checkout')}>결제하기 →</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CHECKOUT ── */
+function CheckoutScreen({ match, setScreen }) {
+  const [step, setStep] = useState(1);
+  const [pay, setPay] = useState('kakao');
+  const methods = [{id:'kakao',label:'카카오페이',emoji:'💛'},{id:'naver',label:'네이버페이',emoji:'💚'},{id:'card',label:'신용카드',emoji:'💳'},{id:'transfer',label:'계좌이체',emoji:'🏦'}];
+  if (step===3) return (
+    <div style={{maxWidth:480,margin:'80px auto',padding:'0 28px',textAlign:'center',animation:'fadeIn 0.4s ease'}}>
+      <div style={{fontSize:64,marginBottom:16}}>🎉</div>
+      <h2 style={{fontSize:22,fontWeight:800,marginBottom:8}}>예매 완료!</h2>
+      <p style={{color:C.fg3,fontSize:14,marginBottom:6}}>예매 번호: <strong style={{color:C.teal,fontFamily:'monospace'}}>KTS-{Math.floor(Math.random()*90000+10000)}</strong></p>
+      <p style={{color:C.fg3,fontSize:13,marginBottom:28}}>확인 문자 및 이메일이 발송되었습니다.</p>
+      <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+        <Btn onClick={()=>setScreen('mytickets')}>내 티켓 보기</Btn>
+        <Btn variant="ghost" onClick={()=>setScreen('home')}>홈으로</Btn>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{maxWidth:620,margin:'0 auto',padding:'28px 28px'}}>
+      <button onClick={()=>step>1?setStep(s=>s-1):setScreen('seat')} style={{background:'none',border:'none',cursor:'pointer',color:C.fg3,fontFamily:'inherit',fontSize:13,marginBottom:24,padding:0}}>← {step>1?'이전':'좌석 선택'}</button>
+      <div style={{display:'flex',gap:0,marginBottom:28}}>
+        {['정보 입력','결제 수단','완료'].map((lb,i)=>(
+          <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',position:'relative'}}>
+            {i<2&&<div style={{position:'absolute',top:14,left:'50%',right:'-50%',height:2,background:i+1<step?C.teal:C.border}}></div>}
+            <div style={{width:28,height:28,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,zIndex:1,background:i+1<=step?C.teal:C.elevated,color:i+1<=step?C.deep:C.fg4,border:`2px solid ${i+1<=step?C.teal:C.border}`}}>{i+1}</div>
+            <div style={{fontSize:10,color:i+1<=step?C.teal:C.fg4,marginTop:5}}>{lb}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:26}}>
+        {step===1&&(
+          <div>
+            <h3 style={{fontSize:15,fontWeight:700,marginBottom:18}}>예매자 정보</h3>
+            <div style={{display:'flex',flexDirection:'column',gap:14}}>
+              {[['이름','홍길동','text'],['전화번호','010-1234-5678','tel'],['이메일','user@ktcloud.com','email']].map(([lb,ph,ty])=>(
+                <div key={lb}>
+                  <label style={{fontSize:11,fontWeight:600,color:C.fg3,display:'block',marginBottom:5}}>{lb}</label>
+                  <input type={ty} defaultValue={ph} style={{fontFamily:'inherit',width:'100%',padding:'9px 13px',background:C.elevated,border:`1px solid ${C.border}`,borderRadius:8,color:C.fg1,fontSize:13,outline:'none'}} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {step===2&&(
+          <div>
+            <h3 style={{fontSize:15,fontWeight:700,marginBottom:18}}>결제 수단 선택</h3>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              {methods.map(m=>(
+                <div key={m.id} onClick={()=>setPay(m.id)} style={{padding:'14px 16px',border:`1.5px solid ${pay===m.id?C.teal:C.border}`,borderRadius:10,cursor:'pointer',background:pay===m.id?'rgba(93,187,160,0.08)':C.elevated,display:'flex',alignItems:'center',gap:10,transition:'all 150ms'}}>
+                  <span style={{fontSize:22}}>{m.emoji}</span>
+                  <span style={{fontSize:13,fontWeight:600,color:pay===m.id?C.teal:C.fg2}}>{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{display:'flex',justifyContent:'flex-end',marginTop:18}}>
+        <Btn size="lg" onClick={()=>setStep(s=>s+1)}>{step===2?'결제 완료':'다음 →'}</Btn>
+      </div>
+    </div>
+  );
+}
+
+/* ── MY TICKETS ── */
+function MyTicketsScreen({ setScreen }) {
+  const [tab, setTab] = useState('CONFIRMED');
+  const tabs = [{id:'CONFIRMED',label:'예매 완료'},{id:'USED',label:'사용 완료'},{id:'CANCELLED',label:'취소'}];
+  const statusStyle = {
+    CONFIRMED:{color:C.success,bg:'rgba(62,207,142,0.1)',bd:'rgba(62,207,142,0.25)',label:'예매 완료'},
+    USED:      {color:C.fg3,   bg:C.elevated,            bd:C.border,              label:'사용 완료'},
+    CANCELLED: {color:C.error, bg:'rgba(239,68,68,0.1)',  bd:'rgba(239,68,68,0.2)', label:'취소됨'},
+  };
+  const filtered = myTickets.filter(t=>t.status===tab);
+  return (
+    <div style={{maxWidth:800,margin:'0 auto',padding:'28px 28px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
+        <h1 style={{fontSize:20,fontWeight:800,letterSpacing:'-0.02em'}}>내 티켓</h1>
+        <Badge variant="teal">{myTickets.filter(t=>t.status==='CONFIRMED').length}매 예매 완료</Badge>
+      </div>
+      <div style={{display:'flex',gap:2,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:4,marginBottom:24,width:'fit-content'}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{fontFamily:'inherit',cursor:'pointer',padding:'8px 18px',borderRadius:8,fontSize:13,fontWeight:600,background:tab===t.id?C.elevated:'transparent',color:tab===t.id?C.fg1:C.fg3,border:'none',transition:'all 150ms'}}>{t.label}</button>
+        ))}
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:12}}>
+        {filtered.length===0?(
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:40,textAlign:'center',color:C.fg3}}>
+            <div style={{fontSize:32,marginBottom:10}}>🎫</div>
+            <div>해당 티켓이 없습니다</div>
+          </div>
+        ):filtered.map(t=>{
+          const sm = sportMeta[t.sport];
+          const ss = statusStyle[t.status];
+          return (
+            <div key={t.id} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:'16px 20px',display:'flex',alignItems:'center',gap:16,animation:'fadeIn 0.3s ease'}}>
+              <div style={{width:50,height:50,borderRadius:12,background:`${sm.color}22`,border:`1px solid ${sm.color}44`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,flexShrink:0}}>{sm.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:14,marginBottom:4}}>{t.match}</div>
+                <div style={{fontSize:12,color:C.fg3}}>📅 {t.date} &nbsp;·&nbsp; 💺 {t.seat}</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:16,fontWeight:800,color:C.teal,marginBottom:6}}>₩{t.price.toLocaleString()}</div>
+                <span style={{fontSize:11,fontWeight:600,color:ss.color,background:ss.bg,border:`1px solid ${ss.bd}`,borderRadius:9999,padding:'2px 10px'}}>{ss.label}</span>
+              </div>
+              {t.status==='CONFIRMED'&&(
+                <button style={{fontFamily:'inherit',fontSize:11,fontWeight:600,color:C.error,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:8,padding:'6px 12px',cursor:'pointer',marginLeft:8}}>취소</button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── CHAT ── */
+const chatChannels = [
+  {id:'general',name:'# general',unread:3},
+  {id:'baseball',name:'# ⚾ 야구',unread:12},
+  {id:'soccer',name:'# ⚽ 축구',unread:0},
+  {id:'basketball',name:'# 🏀 농구',unread:7},
+  {id:'tickets',name:'# 티켓-공유',unread:1},
+  {id:'dev',name:'# 개발',unread:0},
+];
+const initMsgs = {
+  general:[
+    {id:1,user:'김개발',avatar:'김',color:C.teal,time:'오후 2:13',text:'오늘 KT vs 두산 경기 누가 봐요? 티켓 남은 거 있으면 공유해 주세요 ⚾'},
+    {id:2,user:'이디자인',avatar:'이',color:C.purple,time:'오후 2:15',text:'저 3루측 2장 있는데 같이 가실 분? ₩25,000에 드릴게요'},
+    {id:3,user:'박운영',avatar:'박',color:C.red,time:'오후 2:18',text:'저 갈게요! DM 주세요 🙌'},
+    {id:4,user:'나',avatar:'K',color:C.teal,time:'오후 2:20',text:'저도 관심 있어요! 자리 있으면 알려주세요',isMe:true},
+  ],
+  basketball:[
+    {id:1,user:'농구팬',avatar:'농',color:C.orange,time:'오후 1:00',text:'KT 소닉붐 오늘 홈경기! 누가 가요?'},
+    {id:2,user:'나',avatar:'K',color:C.teal,time:'오후 1:05',text:'저 VIP석 예매했어요 ㅎㅎ',isMe:true},
+  ],
+};
+
+function ChatScreen() {
+  const [ch, setCh] = useState('general');
+  const [msgs, setMsgs] = useState(initMsgs);
+  const [input, setInput] = useState('');
+  const bottomRef = useRef(null);
+  const list = msgs[ch]||[];
+  useEffect(()=>{ if(bottomRef.current) bottomRef.current.scrollTop=bottomRef.current.scrollHeight; },[ch,msgs]);
+  const send = () => {
+    if(!input.trim()) return;
+    const now = new Date();
+    setMsgs(prev=>({...prev,[ch]:[...(prev[ch]||[]),{id:Date.now(),user:'나',avatar:'K',color:C.teal,time:`오후 ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`,text:input.trim(),isMe:true}]}));
+    setInput('');
+  };
+  return (
+    <div style={{display:'flex',height:'calc(100vh - 58px)',maxWidth:1100,margin:'0 auto'}}>
+      <div style={{width:210,background:C.card,borderRight:`1px solid ${C.border}`,padding:'16px 0',flexShrink:0}}>
+        <div style={{padding:'0 14px',marginBottom:12}}>
+          <div style={{fontSize:10,fontWeight:700,color:C.fg4,letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:6}}>채널</div>
+        </div>
+        {chatChannels.map(c=>(
+          <button key={c.id} onClick={()=>setCh(c.id)} style={{width:'100%',textAlign:'left',background:ch===c.id?'rgba(93,187,160,0.1)':'none',border:'none',cursor:'pointer',fontFamily:'inherit',padding:'7px 14px',display:'flex',alignItems:'center',justifyContent:'space-between',color:ch===c.id?C.teal:c.unread?C.fg2:C.fg4,fontWeight:ch===c.id?700:c.unread?600:400,fontSize:12}}>
+            <span>{c.name}</span>
+            {c.unread>0&&<span style={{background:C.teal,color:C.deep,borderRadius:9999,fontSize:9,fontWeight:700,padding:'1px 5px'}}>{c.unread}</span>}
+          </button>
+        ))}
+        <div style={{padding:'10px 14px',marginTop:8,borderTop:`1px solid ${C.border}`}}>
+          <div style={{fontSize:10,fontWeight:700,color:C.fg4,letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:6}}>DM</div>
+          {[{name:'이디자인',on:true},{name:'박운영',on:false}].map(u=>(
+            <div key={u.name} style={{display:'flex',alignItems:'center',gap:7,padding:'5px 0',cursor:'pointer'}}>
+              <div style={{position:'relative'}}>
+                <div style={{width:20,height:20,borderRadius:'50%',background:C.elevated,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,color:C.fg3}}>{u.name[0]}</div>
+                <div style={{position:'absolute',bottom:0,right:0,width:6,height:6,borderRadius:'50%',background:u.on?C.success:C.warning,border:`1.5px solid ${C.card}`}}></div>
+              </div>
+              <span style={{fontSize:11,color:C.fg3}}>{u.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+        <div style={{padding:'10px 18px',borderBottom:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:14,fontWeight:700}}>{chatChannels.find(c=>c.id===ch)?.name}</span>
+          <span style={{fontSize:11,color:C.fg4}}>· {list.length}개 메시지</span>
+        </div>
+        <div ref={bottomRef} style={{flex:1,overflowY:'auto',padding:'14px 18px',display:'flex',flexDirection:'column',gap:2}}>
+          {list.map(m=>(
+            <div key={m.id} style={{display:'flex',gap:9,padding:'5px 6px',borderRadius:8,flexDirection:m.isMe?'row-reverse':'row'}}>
+              <div style={{width:30,height:30,borderRadius:'50%',background:`${m.color}33`,border:`1.5px solid ${m.color}55`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:m.color,flexShrink:0}}>{m.avatar}</div>
+              <div style={{maxWidth:'70%'}}>
+                <div style={{display:'flex',gap:7,alignItems:'baseline',marginBottom:2,flexDirection:m.isMe?'row-reverse':'row'}}>
+                  <span style={{fontSize:11,fontWeight:700,color:m.color}}>{m.user}</span>
+                  <span style={{fontSize:9,color:C.fg4}}>{m.time}</span>
+                </div>
+                <div style={{background:m.isMe?'rgba(93,187,160,0.12)':C.elevated,border:`1px solid ${m.isMe?'rgba(93,187,160,0.25)':C.border}`,borderRadius:m.isMe?'12px 2px 12px 12px':'2px 12px 12px 12px',padding:'7px 11px',fontSize:13,lineHeight:1.5}}>{m.text}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:'10px 18px',borderTop:`1px solid ${C.border}`,display:'flex',gap:8}}>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="메시지 입력..." style={{flex:1,fontFamily:'inherit',padding:'9px 14px',background:C.elevated,border:`1px solid ${C.border}`,borderRadius:9,color:C.fg1,fontSize:13,outline:'none'}} />
+          <Btn onClick={send} disabled={!input.trim()}>전송</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── NOTIFICATION SETTINGS ── */
+function NotificationsScreen() {
+  const [settings, setSettings] = useState({ticketOpen:true, gameStart:true, payment:true, mention:true});
+  const [channels, setChannels] = useState([
+    {id:1,type:'EMAIL',target:'user@ktcloud.com',enabled:true},
+    {id:2,type:'MQTT',target:'Android 기기',enabled:true},
+    {id:3,type:'SLACK',target:'#notifications',enabled:false},
+  ]);
+  const toggle = (key) => setSettings(s=>({...s,[key]:!s[key]}));
+  const toggleCh = (id) => setChannels(cs=>cs.map(c=>c.id===id?{...c,enabled:!c.enabled}:c));
+  const typeColor = {EMAIL:'#3B82F6',MQTT:C.teal,SLACK:'#4A154B'};
+  const typeIcon = {EMAIL:'✉️',MQTT:'📡',SLACK:'💬'};
+
+  const notiItems = [
+    {key:'ticketOpen', label:'티켓 오픈 알림', desc:'경기 예매가 시작될 때 알림을 받습니다.', event:'ticket.opened'},
+    {key:'gameStart',  label:'경기 시작 알림', desc:'예매한 경기가 시작 1시간 전 알림을 받습니다.', event:'game.starting'},
+    {key:'payment',    label:'결제 완료 알림', desc:'결제·환불 완료 시 알림을 받습니다.', event:'payment.completed'},
+    {key:'mention',    label:'멘션 알림', desc:'채팅에서 멘션되면 항상 알림을 받습니다.', event:'chat.mentioned'},
+  ];
+
+  return (
+    <div style={{maxWidth:720,margin:'0 auto',padding:'28px 28px'}}>
+      <h1 style={{fontSize:20,fontWeight:800,letterSpacing:'-0.02em',marginBottom:6}}>알림 설정</h1>
+      <p style={{color:C.fg3,fontSize:13,marginBottom:28}}>알림 종류와 수신 채널을 개별 설정할 수 있습니다.</p>
+
+      {/* 알림 종류 */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:'hidden',marginBottom:20}}>
+        <div style={{padding:'14px 20px',borderBottom:`1px solid ${C.border}`,fontSize:13,fontWeight:700}}>알림 종류</div>
+        {notiItems.map((item,i)=>(
+          <div key={item.key} style={{padding:'16px 20px',borderBottom:i<notiItems.length-1?`1px solid ${C.border}`:'none',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16}}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:14,marginBottom:3}}>{item.label}</div>
+              <div style={{fontSize:12,color:C.fg3,marginBottom:4}}>{item.desc}</div>
+              <span style={{fontSize:10,fontFamily:'monospace',color:C.teal,background:'rgba(93,187,160,0.1)',border:'1px solid rgba(93,187,160,0.2)',borderRadius:4,padding:'2px 7px'}}>{item.event}</span>
+            </div>
+            <Toggle value={settings[item.key]} onChange={()=>toggle(item.key)} />
+          </div>
+        ))}
+      </div>
+
+      {/* 채널 관리 */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:'hidden',marginBottom:20}}>
+        <div style={{padding:'14px 20px',borderBottom:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <span style={{fontSize:13,fontWeight:700}}>알림 채널</span>
+          <Btn variant="ghost" size="sm">+ 채널 추가</Btn>
+        </div>
+        {channels.map((ch,i)=>(
+          <div key={ch.id} style={{padding:'14px 20px',borderBottom:i<channels.length-1?`1px solid ${C.border}`:'none',display:'flex',alignItems:'center',gap:14}}>
+            <div style={{width:36,height:36,borderRadius:10,background:`${typeColor[ch.type]}22`,border:`1px solid ${typeColor[ch.type]}44`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{typeIcon[ch.type]}</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:13,marginBottom:2}}>{ch.type}</div>
+              <div style={{fontSize:12,color:C.fg3}}>{ch.target}</div>
+            </div>
+            <Toggle value={ch.enabled} onChange={()=>toggleCh(ch.id)} />
+            <button style={{background:'none',border:'none',cursor:'pointer',color:C.fg4,fontSize:12,padding:'4px 8px',borderRadius:6}}>삭제</button>
+          </div>
+        ))}
+      </div>
+
+      {/* 알림 이력 */}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'14px 20px',borderBottom:`1px solid ${C.border}`,fontSize:13,fontWeight:700}}>최근 알림 이력</div>
+        {[
+          {type:'MQTT',   event:'ticket.opened',     msg:'KT Wiz vs LG 예매 오픈!',          time:'10분 전', ok:true},
+          {type:'EMAIL',  event:'payment.completed',  msg:'결제 완료 ₩25,000',                time:'2시간 전',ok:true},
+          {type:'MQTT',   event:'game.starting',      msg:'KT Wiz 경기 1시간 후 시작합니다', time:'1일 전',  ok:true},
+          {type:'EMAIL',  event:'payment.completed',  msg:'이메일 발송 실패 — 재시도 중',    time:'2일 전',  ok:false},
+        ].map((h,i)=>(
+          <div key={i} style={{padding:'12px 20px',borderBottom:i<3?`1px solid ${C.border}`:'none',display:'flex',alignItems:'center',gap:12}}>
+            <span style={{fontSize:16,flexShrink:0}}>{typeIcon[h.type]}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,fontWeight:600,marginBottom:2}}>{h.msg}</div>
+              <div style={{fontSize:10,color:C.fg4,fontFamily:'monospace'}}>{h.event}</div>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:10,color:C.fg4,marginBottom:3}}>{h.time}</div>
+              <span style={{fontSize:10,fontWeight:600,color:h.ok?C.success:C.error,background:h.ok?'rgba(62,207,142,0.1)':'rgba(239,68,68,0.1)',border:`1px solid ${h.ok?'rgba(62,207,142,0.2)':'rgba(239,68,68,0.2)'}`,borderRadius:9999,padding:'2px 7px'}}>{h.ok?'발송 완료':'실패'}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── ADMIN ── */
+const adminStats = [
+  {label:'이번 달 판매',value:'12,847',sub:'+23% 전월 대비',color:C.teal},
+  {label:'총 매출',     value:'₩384M', sub:'+18% 전월 대비',color:C.success},
+  {label:'활성 경기',   value:'24',    sub:'이번 주 8경기',  color:C.info},
+  {label:'대기열 평균', value:'247명', sub:'최고 1,843명',   color:C.warning},
+];
+const recentSales = [
+  {id:'KTS-84721',sport:'⚾',match:'KT Wiz vs 두산',  date:'2025.06.15',qty:2,total:50000,status:'CONFIRMED'},
+  {id:'KTS-84720',sport:'⚽',match:'수원 FC vs 전북', date:'2025.06.20',qty:4,total:72000,status:'CONFIRMED'},
+  {id:'KTS-84719',sport:'🏀',match:'KT 소닉붐 vs 모비스',date:'2025.06.24',qty:1,total:22000,status:'CONFIRMED'},
+  {id:'KTS-84718',sport:'⚾',match:'KT Wiz vs LG',    date:'2025.06.18',qty:3,total:90000,status:'PENDING'},
+  {id:'KTS-84717',sport:'⚽',match:'수원 삼성 vs 울산',date:'2025.06.22',qty:2,total:40000,status:'CANCELLED'},
+];
+const ssStyles = {CONFIRMED:{color:C.success,label:'확정'},PENDING:{color:C.warning,label:'대기'},CANCELLED:{color:C.error,label:'취소'}};
+
+function AdminScreen() {
+  return (
+    <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 28px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
+        <div>
+          <h1 style={{fontSize:20,fontWeight:800,letterSpacing:'-0.02em'}}>운영 대시보드</h1>
+          <p style={{color:C.fg3,fontSize:12,marginTop:3}}>2025년 6월 · 실시간</p>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <Badge variant="green"><span style={{width:6,height:6,borderRadius:'50%',background:C.success,display:'inline-block'}}></span> 서버 정상</Badge>
+          <Btn variant="ghost" size="sm">Slack 배포</Btn>
+        </div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:24}}>
+        {adminStats.map(s=>(
+          <div key={s.label} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+            <div style={{fontSize:10,color:C.fg4,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:8}}>{s.label}</div>
+            <div style={{fontSize:26,fontWeight:800,color:s.color,letterSpacing:'-0.02em',marginBottom:4}}>{s.value}</div>
+            <div style={{fontSize:10,color:C.fg4}}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:14,marginBottom:20}}>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+          <div style={{fontSize:12,fontWeight:700,marginBottom:14}}>월별 티켓 판매 추이</div>
+          <div style={{display:'flex',alignItems:'flex-end',gap:6,height:90}}>
+            {[60,75,55,90,80,100,70,85,95,88,72,92].map((h,i)=>(
+              <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                <div style={{width:'100%',borderRadius:'3px 3px 0 0',background:i===11?C.teal:C.elevated,height:`${h}%`}}></div>
+                <span style={{fontSize:8,color:C.fg4}}>{i+1}월</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+          <div style={{fontSize:12,fontWeight:700,marginBottom:14}}>종목별 판매</div>
+          {[['⚾ 야구',48,C.red],['⚽ 축구',28,C.green],['🏀 농구',17,C.orange],['🎮 e스포츠',7,C.purple]].map(([n,p,c])=>(
+            <div key={n} style={{marginBottom:10}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                <span style={{fontSize:11}}>{n}</span>
+                <span style={{fontSize:11,fontWeight:700,color:c}}>{p}%</span>
+              </div>
+              <div style={{height:5,background:C.elevated,borderRadius:3}}><div style={{height:'100%',width:`${p}%`,background:c,borderRadius:3}}></div></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{fontSize:12,fontWeight:700}}>최근 예매 내역</div>
+          <Btn variant="ghost" size="sm">전체 보기</Btn>
+        </div>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead><tr style={{background:C.elevated}}>
+            {['예매번호','종목','경기','날짜','수량','금액','상태'].map(h=>(
+              <th key={h} style={{padding:'9px 14px',fontSize:10,fontWeight:700,color:C.fg4,textTransform:'uppercase',letterSpacing:'0.05em',textAlign:'left'}}>{h}</th>
+            ))}
+          </tr></thead>
+          <tbody>{recentSales.map((r,i)=>(
+            <tr key={r.id} style={{borderTop:`1px solid ${C.border}`}}>
+              <td style={{padding:'11px 14px',fontSize:11,color:C.teal,fontFamily:'monospace',fontWeight:600}}>{r.id}</td>
+              <td style={{padding:'11px 14px',fontSize:15}}>{r.sport}</td>
+              <td style={{padding:'11px 14px',fontSize:12,color:C.fg2}}>{r.match}</td>
+              <td style={{padding:'11px 14px',fontSize:11,color:C.fg3}}>{r.date}</td>
+              <td style={{padding:'11px 14px',fontSize:12}}>{r.qty}매</td>
+              <td style={{padding:'11px 14px',fontSize:13,fontWeight:700}}>₩{r.total.toLocaleString()}</td>
+              <td style={{padding:'11px 14px'}}>
+                <span style={{fontSize:10,fontWeight:600,color:ssStyles[r.status].color,background:`${ssStyles[r.status].color}22`,border:`1px solid ${ssStyles[r.status].color}44`,borderRadius:9999,padding:'2px 8px'}}>{ssStyles[r.status].label}</span>
+              </td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ── APP ── */
+function App() {
+  const [screen, setScreen] = useState('home');
+  const [match, setMatch] = useState(matches[0]);
+  const screens = {
+    home:      <HomeScreen setScreen={setScreen} setMatch={setMatch} />,
+    queue:     <QueueScreen match={match} setScreen={setScreen} />,
+    seat:      <SeatScreen match={match} setScreen={setScreen} />,
+    checkout:  <CheckoutScreen match={match} setScreen={setScreen} />,
+    mytickets: <MyTicketsScreen setScreen={setScreen} />,
+    chat:      <ChatScreen />,
+    notifications: <NotificationsScreen />,
+    admin:     <AdminScreen />,
+  };
+  return (
+    <div style={{minHeight:'100vh',background:C.dark}}>
+      <NavBar screen={screen} setScreen={setScreen} />
+      <div style={{animation:'fadeIn 0.2s ease'}}>{screens[screen]||screens.home}</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

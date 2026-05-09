@@ -1,0 +1,55 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+    font-family: 'Noto Sans KR';
+    src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900; font-style: normal; font-display: swap;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px; display:flex; gap:12px; }
+  .card { flex:1; border-radius:16px; padding:16px 14px 14px; display:flex; flex-direction:column; gap:10px; background:#1C2030; border:1px solid #2A2F45; }
+  .symbol-wrap { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; line-height:1; background:rgba(255,255,255,0.06); }
+  .name { font-size:14px; font-weight:700; }
+  .hex  { font-size:11px; font-family:monospace; opacity:0.65; margin-top:1px; }
+  .desc { font-size:11px; opacity:0.55; margin-top:2px; }
+  .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:2px; }
+  .chip { font-size:10px; font-weight:600; border-radius:9999px; padding:2px 8px; }
+</style></head><body>
+
+<div class="card">
+  <div class="symbol-wrap" style="box-shadow:0 0 0 3px #E8003D44,0 0 24px rgba(232,0,61,0.5);">⚾</div>
+  <div><div class="name" style="color:#ff8fa3;">야구</div><div class="hex" style="color:#ff8fa3;">#E8003D</div><div class="desc" style="color:#C8CCDA;">KT Wiz · 두산 · 롯데</div></div>
+  <div class="chips">
+    <span class="chip" style="color:#ff8fa3;background:rgba(232,0,61,0.12);border:1px solid rgba(232,0,61,0.25);">홈런</span>
+    <span class="chip" style="color:#ff8fa3;background:rgba(232,0,61,0.12);border:1px solid rgba(232,0,61,0.25);">직관</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="symbol-wrap" style="box-shadow:0 0 0 3px #1B6B3A55,0 0 24px rgba(27,107,58,0.5);">⚽</div>
+  <div><div class="name" style="color:#6ee7a0;">축구</div><div class="hex" style="color:#6ee7a0;">#1B6B3A</div><div class="desc" style="color:#C8CCDA;">수원 FC · 전북 · 울산</div></div>
+  <div class="chips">
+    <span class="chip" style="color:#6ee7a0;background:rgba(27,107,58,0.15);border:1px solid rgba(27,107,58,0.35);">골</span>
+    <span class="chip" style="color:#6ee7a0;background:rgba(27,107,58,0.15);border:1px solid rgba(27,107,58,0.35);">응원</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="symbol-wrap" style="box-shadow:0 0 0 3px #F9731644,0 0 24px rgba(249,115,22,0.5);">🏀</div>
+  <div><div class="name" style="color:#fdba74;">농구</div><div class="hex" style="color:#fdba74;">#F97316</div><div class="desc" style="color:#C8CCDA;">KT 소닉붐 · 현대모비스</div></div>
+  <div class="chips">
+    <span class="chip" style="color:#fdba74;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);">덩크</span>
+    <span class="chip" style="color:#fdba74;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);">3점</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="symbol-wrap" style="box-shadow:0 0 0 3px #7B2FBE44,0 0 24px rgba(123,47,190,0.5);">🎮</div>
+  <div><div class="name" style="color:#c084fc;">e스포츠</div><div class="hex" style="color:#c084fc;">#7B2FBE</div><div class="desc" style="color:#C8CCDA;">T1 · Gen.G · KT Rolster</div></div>
+  <div class="chips">
+    <span class="chip" style="color:#c084fc;background:rgba(123,47,190,0.15);border:1px solid rgba(123,47,190,0.3);">MVP</span>
+    <span class="chip" style="color:#c084fc;background:rgba(123,47,190,0.15);border:1px solid rgba(123,47,190,0.3);">랭크</span>
+  </div>
+</div>
+
+</body></html>

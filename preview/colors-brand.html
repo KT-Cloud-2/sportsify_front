@@ -1,0 +1,46 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px; }
+  .row { display:flex; gap:10px; }
+  .swatch { flex:1; border-radius:8px; overflow:hidden; }
+  .color-block { height:72px; }
+  .info { padding:8px 10px; background:#1C2030; }
+  .name { font-size:12px; font-weight:600; color:#fff; }
+  .hex  { font-size:11px; color:#8B93B0; font-family:monospace; margin-top:2px; }
+  .role { font-size:10px; color:#5DBBA0; margin-top:2px; }
+</style></head><body>
+<div class="row">
+  <div class="swatch">
+    <div class="color-block" style="background:#5DBBA0;"></div>
+    <div class="info"><div class="name">Brand Teal</div><div class="hex">#5DBBA0</div><div class="role">Primary accent</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#4EA8A9;"></div>
+    <div class="info"><div class="name">Teal Blue</div><div class="hex">#4EA8A9</div><div class="role">Secondary accent</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#3D8C7E;"></div>
+    <div class="info"><div class="name">Teal Dim</div><div class="hex">#3D8C7E</div><div class="role">Hover state</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#DBF9E8;"></div>
+    <div class="info"><div class="name">Teal Light</div><div class="hex">#DBF9E8</div><div class="role">On-dark highlight</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#171A2C;border:1px solid #3D4464;"></div>
+    <div class="info"><div class="name">Brand Dark</div><div class="hex">#171A2C</div><div class="role">Base background</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#0E2421;"></div>
+    <div class="info"><div class="name">Deep Forest</div><div class="hex">#0E2421</div><div class="role">Dark surface</div></div>
+  </div>
+</div>
+</body></html>

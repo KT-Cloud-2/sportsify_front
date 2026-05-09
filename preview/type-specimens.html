@@ -1,0 +1,44 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px 24px; display:flex; gap:20px; }
+  .col { flex:1; }
+  .tag { font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5DBBA0; margin-bottom:6px; }
+  .score { font-size:52px; font-weight:800; letter-spacing:-0.04em; color:#fff; line-height:1; }
+  .score-label { font-size:11px; color:#8B93B0; margin-top:4px; }
+  .divider { width:1px; background:#2A2F45; }
+  .label-row { font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#5A6280; margin-bottom:8px; }
+  .code-block { font-family:'JetBrains Mono','Fira Code',monospace; font-size:12px; background:#1C2030; border:1px solid #2A2F45; border-radius:8px; padding:12px 14px; color:#DBF9E8; line-height:1.6; }
+  .code-key { color:#5DBBA0; }
+  .code-str { color:#F59E0B; }
+</style></head><body>
+  <div class="col">
+    <div class="tag">Display — Score</div>
+    <div class="score">3 : 1</div>
+    <div class="score-label">KT Wiz vs 두산 베어스 · 9회말</div>
+    <div style="margin-top:16px;">
+      <div class="tag">Label Style</div>
+      <div class="label-row">잔여 좌석 · REMAINING SEATS</div>
+      <div style="font-size:28px;font-weight:700;color:#5DBBA0;">142</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="col">
+    <div class="tag">Mono — API Docs</div>
+    <div class="code-block">
+      <span class="code-key">GET</span> /api/v1/tickets<br>
+      {<br>
+      &nbsp;&nbsp;<span class="code-key">"sport"</span>: <span class="code-str">"baseball"</span>,<br>
+      &nbsp;&nbsp;<span class="code-key">"date"</span>: <span class="code-str">"2025-06-15"</span>,<br>
+      &nbsp;&nbsp;<span class="code-key">"seats"</span>: 142<br>
+      }
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:16px; display:flex; gap:12px; align-items:flex-start; }
+  .card { background:#1C2030; border:1px solid #2A2F45; border-radius:12px; overflow:hidden; flex:1; }
+  .card-img { height:72px; display:flex; align-items:center; justify-content:center; font-size:32px; }
+  .card-body { padding:12px 14px; }
+  .card-title { font-size:13px; font-weight:700; color:#fff; }
+  .card-sub { font-size:11px; color:#8B93B0; margin-top:3px; }
+  .card-meta { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+  .price { font-size:16px; font-weight:800; color:#5DBBA0; }
+  .badge { font-size:10px; font-weight:600; border-radius:9999px; padding:3px 8px; background:rgba(62,207,142,0.12); color:#3ECF8E; border:1px solid rgba(62,207,142,0.2); }
+  .stat-card { background:#1C2030; border:1px solid #2A2F45; border-radius:12px; padding:14px; flex:0.8; }
+  .stat-label { font-size:10px; color:#5A6280; text-transform:uppercase; letter-spacing:0.06em; }
+  .stat-val { font-size:28px; font-weight:800; color:#5DBBA0; margin-top:4px; line-height:1; }
+  .stat-desc { font-size:11px; color:#8B93B0; margin-top:4px; }
+</style></head><body>
+  <div class="card">
+    <div class="card-img" style="background:linear-gradient(135deg,#1a0010,#E8003D44);">⚾</div>
+    <div class="card-body">
+      <div class="card-title">KT Wiz vs 두산</div>
+      <div class="card-sub">2025.06.15 · 수원KT위즈파크</div>
+      <div class="card-meta">
+        <div class="price">₩25,000~</div>
+        <span class="badge">예매 가능</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-img" style="background:linear-gradient(135deg,#001a08,#1B6B3A55);">⚽</div>
+    <div class="card-body">
+      <div class="card-title">수원 FC vs 전북</div>
+      <div class="card-sub">2025.06.20 · 수원월드컵경기장</div>
+      <div class="card-meta">
+        <div class="price">₩18,000~</div>
+        <span class="badge" style="background:rgba(245,158,11,0.12);color:#F59E0B;border-color:rgba(245,158,11,0.2);">마감 임박</span>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">이번 달 판매</div>
+    <div class="stat-val">12,847</div>
+    <div class="stat-desc">+23% 전월 대비</div>
+  </div>
+</body></html>

@@ -1,0 +1,240 @@
+/* ============================================================
+   KT Cloud Sports — Design Tokens
+   Source: assets/logo.svg, brand brief
+   Font: Pretendard (CDN) — substitute for production woff2
+   ============================================================ */
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------
+   BASE COLOR PALETTE
+   ------------------------------------------------------------ */
+:root {
+  /* Brand Core */
+  --color-brand-dark:       #171A2C;
+  --color-brand-teal:       #5DBBA0;
+  --color-brand-teal-blue:  #4EA8A9;
+  --color-brand-teal-light: #DBF9E8;
+  --color-brand-teal-dim:   #3D8C7E;
+  --color-brand-deep:       #0E2421;
+
+  /* Sport Accents */
+  --color-sport-baseball:   #E8003D;
+  --color-sport-soccer:     #1B6B3A;
+  --color-sport-basketball: #F97316;
+  --color-sport-esports:    #7B2FBE;
+
+  /* Neutral Scale */
+  --color-neutral-50:  #F8F9FA;
+  --color-neutral-100: #ECEEF4;
+  --color-neutral-200: #C8CCDA;
+  --color-neutral-300: #8B93B0;
+  --color-neutral-400: #5A6280;
+  --color-neutral-500: #3D4464;
+  --color-neutral-600: #2A2F45;
+  --color-neutral-700: #1C2030;
+  --color-neutral-800: #141828;
+  --color-neutral-900: #0D1020;
+
+  /* Semantic */
+  --color-success:  #3ECF8E;
+  --color-warning:  #F59E0B;
+  --color-error:    #EF4444;
+  --color-info:     #3B82F6;
+
+  /* ------------------------------------------------------------
+     SEMANTIC SURFACE TOKENS
+     ------------------------------------------------------------ */
+  --surface-base:      var(--color-brand-dark);
+  --surface-card:      var(--color-neutral-700);
+  --surface-elevated:  var(--color-neutral-600);
+  --surface-overlay:   rgba(23, 26, 44, 0.92);
+  --surface-invert:    var(--color-neutral-50);
+
+  --border-default:    var(--color-neutral-500);
+  --border-active:     var(--color-brand-teal);
+  --border-error:      var(--color-error);
+
+  /* Foreground */
+  --fg-primary:   #FFFFFF;
+  --fg-secondary: var(--color-neutral-200);
+  --fg-tertiary:  var(--color-neutral-300);
+  --fg-disabled:  var(--color-neutral-400);
+  --fg-inverse:   var(--color-brand-dark);
+  --fg-teal:      var(--color-brand-teal);
+
+  /* ------------------------------------------------------------
+     SHADOWS
+     ------------------------------------------------------------ */
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:    0 8px 32px rgba(0,0,0,0.6);
+  --shadow-teal:  0 0 20px rgba(93, 187, 160, 0.25);
+  --shadow-focus: 0 0 0 3px rgba(93, 187, 160, 0.35);
+
+  /* ------------------------------------------------------------
+     BORDER RADIUS
+     ------------------------------------------------------------ */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+  --radius-pill: 9999px;
+
+  /* ------------------------------------------------------------
+     SPACING SCALE (4px base)
+     ------------------------------------------------------------ */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ------------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------------ */
+  --font-sans:  'Noto Sans KR', -apple-system, 'Apple SD Gothic Neo',
+                'Malgun Gothic', sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', 'Cascadia Code',
+                'Courier New', monospace;
+
+  /* Font sizes */
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  36px;
+  --text-5xl:  48px;
+  --text-6xl:  60px;
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold: 600;
+  --weight-bold:    700;
+  --weight-extrabold: 800;
+
+  /* Line heights */
+  --leading-tight:  1.2;
+  --leading-snug:   1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.03em;
+  --tracking-normal: -0.01em;
+  --tracking-wide:   0.04em;
+  --tracking-wider:  0.08em;
+
+  /* ------------------------------------------------------------
+     ANIMATION
+     ------------------------------------------------------------ */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter:    cubic-bezier(0.0, 0, 0.2, 1);
+  --ease-exit:     cubic-bezier(0.4, 0, 1, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+}
+
+/* ------------------------------------------------------------
+   SEMANTIC TYPE STYLES
+   ------------------------------------------------------------ */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  color: var(--fg-primary);
+  background-color: var(--surface-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, .h1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+h2, .h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+h3, .h3 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+h4, .h4 {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+}
+
+p, .body {
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--fg-secondary);
+}
+
+.body-sm {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--fg-secondary);
+}
+
+.caption {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+  color: var(--fg-tertiary);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+
+.display {
+  font-size: var(--text-6xl);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--surface-elevated);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  color: var(--color-brand-teal-light);
+}

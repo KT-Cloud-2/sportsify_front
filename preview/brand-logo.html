@@ -1,0 +1,43 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  @font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:#171A2C; padding:20px 24px; display:flex; gap:20px; align-items:center; }
+  .logo-block { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .logo-bg { border-radius:12px; padding:16px; display:flex; align-items:center; justify-content:center; }
+  .label { font-size:10px; color:#5A6280; text-align:center; }
+  img { display:block; }
+  .divider { width:1px; background:#2A2F45; align-self:stretch; }
+  .palette { display:flex; flex-direction:column; gap:6px; justify-content:center; }
+  .palette-row { display:flex; gap:6px; align-items:center; }
+  .palette-dot { width:20px; height:20px; border-radius:4px; }
+  .palette-label { font-size:10px; color:#8B93B0; font-family:monospace; }
+</style></head><body>
+  <div class="logo-block">
+    <div class="logo-bg" style="background:#171A2C;border:1px solid #2A2F45;">
+      <img src="../assets/logo.svg" width="80" height="75" alt="KT Cloud Sports Logo" />
+    </div>
+    <div class="label">Dark BG</div>
+  </div>
+  <div class="logo-block">
+    <div class="logo-bg" style="background:#0E2421;">
+      <img src="../assets/logo.svg" width="80" height="75" alt="KT Cloud Sports Logo" />
+    </div>
+    <div class="label">Deep BG</div>
+  </div>
+  <div class="divider"></div>
+  <div class="palette">
+    <div style="font-size:10px;font-weight:700;color:#5DBBA0;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;">Logo Colors</div>
+    <div class="palette-row"><div class="palette-dot" style="background:#5DBBA0;"></div><div class="palette-label">#5DBBA0 — Primary Teal</div></div>
+    <div class="palette-row"><div class="palette-dot" style="background:#4EA8A9;"></div><div class="palette-label">#4EA8A9 — Teal Blue</div></div>
+    <div class="palette-row"><div class="palette-dot" style="background:#7AD095;"></div><div class="palette-label">#7AD095 — Light Teal</div></div>
+    <div class="palette-row"><div class="palette-dot" style="background:#DBF9E8;"></div><div class="palette-label">#DBF9E8 — Teal Pale</div></div>
+    <div class="palette-row"><div class="palette-dot" style="background:#171A2C;border:1px solid #3D4464;"></div><div class="palette-label">#171A2C — Dark BG</div></div>
+  </div>
+</body></html>
