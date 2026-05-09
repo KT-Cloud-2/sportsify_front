@@ -28,6 +28,10 @@ export function NavBar() {
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
+  useEffect(() => {
+    document.title = unreadCount > 0 ? `(${unreadCount}) Sportify` : 'Sportify'
+  }, [unreadCount])
+
   return (
     <>
       <nav style={{
