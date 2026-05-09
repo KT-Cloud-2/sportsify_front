@@ -122,23 +122,44 @@ export const useNotificationStream = () => {
     if (!accessToken) return
 
     const baseUrl = import.meta.env.VITE_API_BASE_URL
-    const es = new EventSource(`${baseUrl}/api/notifications/stream?token=${accessToken}`)
+    let es: EventSource
+    let retryTimer: ReturnType<typeof setTimeout> | null = null
+    let retryDelay = 1000
+    let destroyed = false
 
-    es.addEventListener('notification', (event) => {
-      try {
-        const notification: NotificationResponse = JSON.parse(event.data)
-        qc.setQueryData<NotificationResponse[]>(['notifications'], (prev = []) => [
-          notification,
-          ...prev,
-        ])
-        sendBrowserNotification(notification)
-      } catch {
-        // ignore malformed event
+    function connect() {
+      es = new EventSource(`${baseUrl}/api/notifications/stream?token=${accessToken}`)
+
+      es.addEventListener('notification', (event) => {
+        retryDelay = 1000
+        try {
+          const notification: NotificationResponse = JSON.parse(event.data)
+          qc.setQueryData<NotificationResponse[]>(['notifications'], (prev = []) => [
+            notification,
+            ...prev,
+          ])
+          sendBrowserNotification(notification)
+        } catch {
+          // ignore malformed event
+        }
+      })
+
+      es.onerror = () => {
+        es.close()
+        if (destroyed) return
+        retryTimer = setTimeout(() => {
+          retryDelay = Math.min(retryDelay * 2, 30000)
+          connect()
+        }, retryDelay)
       }
-    })
+    }
 
-    es.onerror = () => es.close()
+    connect()
 
-    return () => es.close()
+    return () => {
+      destroyed = true
+      if (retryTimer) clearTimeout(retryTimer)
+      es.close()
+    }
   }, [accessToken, qc])
 }
