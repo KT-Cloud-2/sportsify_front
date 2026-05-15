@@ -1,30 +1,16 @@
 import { useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
 import { C } from '../styles/tokens'
 import { Btn } from '../components/Btn'
 
 export function LoginPage() {
-  const [params] = useSearchParams()
-  const { setTokens, accessToken } = useAuthStore()
+  const accessToken = useAuthStore((s) => s.accessToken)
   const navigate = useNavigate()
 
   useEffect(() => {
-    const at = params.get('accessToken')
-    const rt = params.get('refreshToken')
-    if (at && rt) {
-      setTokens(at, rt)
-      navigate('/', { replace: true })
-    }
-  }, [params, setTokens, navigate])
-
-  useEffect(() => {
-    if (accessToken && !params.get('accessToken')) {
-      navigate('/', { replace: true })
-    }
-  }, [accessToken, navigate, params])
-
-  const baseUrl = import.meta.env.VITE_API_BASE_URL
+    if (accessToken) navigate('/', { replace: true })
+  }, [accessToken, navigate])
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -36,10 +22,10 @@ export function LoginPage() {
 
         <p style={{ textAlign: 'center', color: C.fg3, fontSize: 14, margin: 0 }}>소셜 계정으로 로그인하세요</p>
 
-        <a href={`${baseUrl}/oauth2/authorization/google`} style={{ textDecoration: 'none' }}>
+        <a href="/oauth2/authorization/google" style={{ textDecoration: 'none' }}>
           <Btn variant="ghost" style={{ width: '100%' }}>Google로 로그인</Btn>
         </a>
-        <a href={`${baseUrl}/oauth2/authorization/kakao`} style={{ textDecoration: 'none' }}>
+        <a href="/oauth2/authorization/kakao" style={{ textDecoration: 'none' }}>
           <Btn variant="ghost" style={{ width: '100%', background: '#FEE500', color: '#191919', border: 'none' }}>
             카카오로 로그인
           </Btn>
