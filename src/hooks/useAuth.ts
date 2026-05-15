@@ -9,8 +9,8 @@ export const useAuth = () => {
   const isAuthenticated = accessToken !== null
 
   const handleLogout = async () => {
-    if (accessToken && refreshToken) {
-      await logoutApi(accessToken, refreshToken).catch(() => {})
+    if (refreshToken) {
+      await logoutApi(refreshToken).catch(() => {})
     }
     clear()
     navigate('/login')

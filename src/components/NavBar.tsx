@@ -6,11 +6,10 @@ import { NotificationDrawer } from './NotificationDrawer'
 import { useAuthStore } from '../store/auth'
 
 const navItems = [
-  { id: 'home',     label: '홈',     path: '/' },
-  { id: 'chat',     label: '팀 채팅', path: '/chat' },
-  { id: 'tickets',  label: '예매 내역', path: '/tickets' },
-  { id: 'payments', label: '결제 내역', path: '/payments' },
-  { id: 'mypage',   label: '마이',   path: '/mypage' },
+  { id: 'home',    label: '홈',     path: '/' },
+  { id: 'chat',    label: '팀 채팅', path: '/chat' },
+  { id: 'tickets', label: '예매 내역', path: '/tickets' },
+  { id: 'mypage',  label: '마이',   path: '/mypage' },
 ]
 
 export function NavBar() {

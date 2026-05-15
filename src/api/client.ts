@@ -1,8 +1,15 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 
+// 인증이 필요 없는 공개 엔드포인트용 (토큰 주입 없음)
+export const publicClient = axios.create({
+  baseURL: '',
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// 인증이 필요한 엔드포인트용 (모든 요청에 Bearer 토큰 주입)
 export const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: '',
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -20,13 +27,19 @@ client.interceptors.response.use(
   async (error) => {
     const original = error.config
     const status = error.response?.status
-    const code = error.response?.data?.code
 
-    // JWT 만료/미제출일 때만 refresh 시도 — 다른 401(INVALID_REFRESH_TOKEN 등)은 그대로 reject
-    if (status !== 401 || code !== 'UNAUTHORIZED' || original._retry) {
+    if (status !== 401 || original._retry) {
       return Promise.reject(error)
     }
     original._retry = true
+
+    const { refreshToken, setTokens, clear } = useAuthStore.getState()
+
+    if (!refreshToken) {
+      clear()
+      window.location.href = '/login'
+      return Promise.reject(error)
+    }
 
     if (isRefreshing) {
       return new Promise((resolve) => {
@@ -38,13 +51,8 @@ client.interceptors.response.use(
     }
 
     isRefreshing = true
-    const { refreshToken, setTokens, clear } = useAuthStore.getState()
-
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/token/refresh`,
-        { refreshToken }
-      )
+      const { data } = await publicClient.post('/api/auth/token/refresh', { refreshToken })
       setTokens(data.accessToken, data.refreshToken)
       refreshQueue.forEach((cb) => cb(data.accessToken))
       refreshQueue = []

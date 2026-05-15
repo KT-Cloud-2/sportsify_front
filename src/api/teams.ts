@@ -1,4 +1,4 @@
-import { client } from './client'
+import { publicClient as client } from './client'
 import { TeamResponse } from '../types/api'
 
 export const fetchTeams = (sportType?: string, isActive?: boolean) =>

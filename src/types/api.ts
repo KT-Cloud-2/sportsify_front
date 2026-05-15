@@ -21,17 +21,39 @@ export interface FavoriteTeamResponse {
   priority: number
 }
 
+export interface UpdateNicknameResponse {
+  memberId: number
+  nickname: string
+}
+
+export interface MonthlyActivityAttendedGame {
+  gameId: number
+  team1Name: string
+  team2Name: string
+  gameTime: string
+  venue: string
+}
+
+export interface MonthlyActivityResponse {
+  year: number
+  month: number
+  ticketCount: number
+  chatMessageCount: number
+  attendedGames: MonthlyActivityAttendedGame[]
+}
+
 // Team
 export interface TeamResponse {
   teamId: number
   name: string
   shortName: string | null
   sportType: string
-  isActive: boolean
+  logoUrl: string | null
+  active: boolean
 }
 
 // Game
-export type TeamSide = 'HOME' | 'AWAY'
+export type TeamSide = 'HOME' | 'AWAY' | 'NEUTRAL'
 
 export interface TeamInfo {
   teamId: number
@@ -81,73 +103,59 @@ export interface GameSeatListResponseDto {
   status: string
 }
 
-// Member (extended)
-export interface UpdateNicknameResponse {
-  nickname: string
-}
-
-export interface MonthlyActivityAttendedGame {
+// Seat Reservation
+export interface ReservationSeatsRequestDto {
   gameId: number
-  team1Name: string
-  team2Name: string
-  gameTime: string
-  venue: string
+  seatIds: number[]
 }
 
-export interface MonthlyActivityResponse {
-  year: number
-  month: number
-  ticketCount: number
-  chatMessageCount: number
-  attendedGames: MonthlyActivityAttendedGame[]
-}
+export type ReservationStatus = 'PENDING' | 'PAYING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED'
 
-// Ticket
-export type TicketStatus = 'RESERVED' | 'CANCELLED' | 'USED'
-
-export interface TicketResponse {
-  ticketId: number
-  gameId: number
+export interface ReservationSeatDto {
   seatId: number
-  grade: string
-  section: string
-  rowNumber: string
-  seatNumber: string
+  seatGrade: string
+  seatSection: string
   price: number
-  status: TicketStatus
-  createdAt: string
 }
 
-export interface ReserveTicketRequest {
+export interface ReservationSeatsResponseDto {
+  orderId: number
   gameId: number
-  seatId: number
-}
-
-export interface QueuePositionResponse {
-  position: number
-  estimatedWaitSeconds: number
+  memberId: number
+  status: ReservationStatus
+  reservedAt: string
+  seats: ReservationSeatDto[]
+  expiresAt: string
 }
 
 // Payment
-export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+export interface CreatePaymentRequest {
+  matchId: number
+  seatId: number
+  amount: number
+  paymentMethod: string
+  idempotencyKey: string
+}
+
+export interface ConfirmPaymentRequest {
+  paymentKey: string
+  orderId: string
+  amount: number
+}
+
+export interface CancelPaymentRequest {
+  cancelReason: string
+}
 
 export interface PaymentResponse {
   paymentId: number
-  ticketId: number
+  orderId: string
+  paymentKey: string
   amount: number
-  status: PaymentStatus
-  pgOrderId: string
-  createdAt: string
-}
-
-export interface PaymentRequestBody {
-  ticketId: number
-  amount: number
-}
-
-export interface PaymentVerifyBody {
-  pgOrderId: string
-  pgPaymentId: string
+  paymentMethod: string
+  status: string
+  requestedAt: string
+  approvedAt: string
 }
 
 // Chat
@@ -170,14 +178,34 @@ export interface ChatRoomDetailResponse {
   currentParticipants: number
   createdBy: number
   createdAt: string
-  myMembership: ChatRoomMembershipResponse | null
+  myMembership: ChatRoomMemberResponse | null
 }
 
-export interface ChatRoomMembershipResponse {
+export interface ChatRoomMemberResponse {
   roomId: number
   memberId: number
   status: string
   joinedAt: string
+}
+
+export interface ChatRoomUpdateResponse {
+  roomId: number
+  name: string
+  imageUrl: string | null
+  updatedAt: string
+}
+
+export interface ChatRoomArchiveResponse {
+  roomId: number
+  status: string
+  updatedAt: string
+}
+
+export interface ChatRoomListResponse {
+  items: ChatRoomResponse[]
+  nextCursor: number | null
+  hasNext: boolean
+  totalCount: number
 }
 
 export interface MessageResponse {
@@ -186,6 +214,10 @@ export interface MessageResponse {
   type: string
   content: string
   createdAt: string
+}
+
+export interface MessageDeleteResponse {
+  messageId: number
 }
 
 export interface MessageListResponse {
@@ -210,6 +242,18 @@ export interface NotificationResponse {
   payload: string
   read: boolean
   createdAt: string
+}
+
+export interface PageNotificationResponse {
+  content: NotificationResponse[]
+  totalElements: number
+  totalPages: number
+  numberOfElements: number
+  first: boolean
+  last: boolean
+  size: number
+  number: number
+  empty: boolean
 }
 
 export interface NotificationSettingResponse {
