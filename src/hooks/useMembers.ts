@@ -9,6 +9,7 @@ import {
   deleteFavoriteTeam,
   fetchMonthlyActivity,
 } from '../api/members'
+import { fetchTeams } from '../api/teams'
 
 export const useMe = () =>
   useQuery({ queryKey: ['me'], queryFn: fetchMe })
@@ -53,9 +54,16 @@ export const useDeleteFavoriteTeam = () => {
   })
 }
 
-export const useMonthlyActivity = (year?: number, month?: number) =>
+export const useTeams = (sportType?: string) =>
   useQuery({
-    queryKey: ['monthlyActivity', year, month],
-    queryFn: () => fetchMonthlyActivity(year, month),
+    queryKey: ['teams', sportType],
+    queryFn: () => fetchTeams(sportType, true),
+  })
+
+export const useMonthlyActivity = (_year?: number, _month?: number) =>
+  useQuery({
+    queryKey: ['monthlyActivity'],
+    queryFn: (): never => { throw new Error('not implemented') },
+    enabled: false,
     throwOnError: false,
   })
