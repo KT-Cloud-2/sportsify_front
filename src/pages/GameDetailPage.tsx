@@ -1,10 +1,53 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
 import { SeatMap } from '../components/SeatMap'
 import { Badge } from '../components/Badge'
+import { Btn } from '../components/Btn'
 import { useGameDetail, useGameSeats } from '../hooks/useGames'
-import { GameSeatListResponseDto } from '../types/api'
+import { useReserveSeats } from '../hooks/useTickets'
+import { GameSeatListResponseDto, ReservationSeatsResponseDto } from '../types/api'
 import { C } from '../styles/tokens'
+
+function ReservationModal({
+  reservation,
+  onConfirm,
+  onClose,
+}: {
+  reservation: ReservationSeatsResponseDto
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  const totalAmount = reservation.seats.reduce((sum, s) => sum + s.price, 0)
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 32, minWidth: 340, maxWidth: 480 }}>
+        <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>예매 확인</div>
+        <div style={{ fontSize: 12, color: C.warning, marginBottom: 20 }}>
+          좌석은 15분간 임시 예약됩니다. 결제 완료 전까지 확정되지 않습니다.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+          {reservation.seats.map((s) => (
+            <div key={s.seatId} style={{ background: C.elevated, borderRadius: 10, padding: '10px 14px', fontSize: 13, color: C.fg2 }}>
+              {s.seatGrade} · {s.seatSection} · {s.price.toLocaleString()}원
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.teal, marginBottom: 24 }}>
+          합계: {totalAmount.toLocaleString()}원
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Btn onClick={onConfirm}>결제 진행</Btn>
+          <Btn variant="ghost" onClick={onClose}>취소</Btn>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function GameDetailPage() {
   const { gameId } = useParams<{ gameId: string }>()
@@ -12,12 +55,29 @@ export function GameDetailPage() {
   const id = Number(gameId)
   const { data: game, isLoading } = useGameDetail(id)
   const { data: seats } = useGameSeats(id)
+  const { mutate: reserveSeats, isPending: reserving } = useReserveSeats()
+  const [reservation, setReservation] = useState<ReservationSeatsResponseDto | null>(null)
+  const [reserveError, setReserveError] = useState<string | null>(null)
 
   const home = game?.teams.find((t) => t.side === 'HOME')
   const away = game?.teams.find((t) => t.side === 'AWAY')
 
   const handleConfirm = (seat: GameSeatListResponseDto) => {
-    alert(`예매 완료: ${seat.grade} ${seat.section} ${seat.rowNumber}열 ${seat.seatNumber}번 — ${seat.price.toLocaleString()}원`)
+    setReserveError(null)
+    reserveSeats(
+      { gameId: id, seatIds: [seat.seatId] },
+      {
+        onSuccess: (res) => setReservation(res),
+        onError: (err: unknown) => {
+          const msg = err instanceof Error ? err.message : '좌석 예약에 실패했습니다.'
+          setReserveError(msg)
+        },
+      }
+    )
+  }
+
+  const handleGoToPayment = () => {
+    if (reservation) navigate('/payment', { state: reservation })
   }
 
   if (isLoading) return <div style={{ color: C.fg3, padding: 48 }}>불러오는 중...</div>
@@ -48,7 +108,7 @@ export function GameDetailPage() {
           </div>
 
           {game.seatGradeSummary.length > 0 && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
               {game.seatGradeSummary.map((g) => (
                 <div key={g.grade} style={{ background: C.elevated, borderRadius: 10, padding: '8px 14px', fontSize: 12 }}>
                   <div style={{ color: C.fg3 }}>{g.grade}</div>
@@ -62,11 +122,21 @@ export function GameDetailPage() {
 
         {seats && seats.length > 0 && (
           <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, margin: '0 0 20px' }}>좌석 선택</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>좌석 선택</h2>
+            {reserving && <div style={{ color: C.fg3, marginBottom: 12 }}>예약 처리 중...</div>}
+            {reserveError && <div style={{ color: C.error, fontSize: 13, marginBottom: 12 }}>{reserveError}</div>}
             <SeatMap seats={seats} onConfirm={handleConfirm} />
           </div>
         )}
       </div>
+
+      {reservation && (
+        <ReservationModal
+          reservation={reservation}
+          onConfirm={handleGoToPayment}
+          onClose={() => setReservation(null)}
+        />
+      )}
     </div>
   )
 }

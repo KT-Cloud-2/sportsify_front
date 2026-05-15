@@ -51,7 +51,7 @@ export function SeatMap({ seats, onConfirm }: SeatMapProps) {
               {selected.price.toLocaleString()}원
             </span>
           </div>
-          <Btn onClick={() => onConfirm(selected)}>예매 확정</Btn>
+          <Btn onClick={() => onConfirm(selected)}>예매하기</Btn>
         </div>
       )}
     </div>
