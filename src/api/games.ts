@@ -1,4 +1,4 @@
-import { client } from './client'
+import { publicClient as client } from './client'
 import {
   GameListResponseDto,
   GameDetailResponseDto,
