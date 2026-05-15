@@ -1,55 +1,69 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
-import { Badge } from '../components/Badge'
 import { Btn } from '../components/Btn'
-import { useTickets, useCancelTicket } from '../hooks/useTickets'
-import { TicketResponse } from '../types/api'
+import { Badge } from '../components/Badge'
+import { loadPaymentHistory, PaymentHistoryItem } from '../utils/paymentHistory'
 import { C } from '../styles/tokens'
 
 const STATUS_LABEL: Record<string, string> = {
-  RESERVED: '예매 완료',
-  CANCELLED: '취소됨',
-  USED: '사용 완료',
+  COMPLETED: '결제완료',
+  PENDING: '결제대기',
+  CANCELED: '취소됨',
+  REFUNDED: '환불됨',
+  FAILED: '실패',
 }
 
-const STATUS_VARIANT: Record<string, 'teal' | 'red' | 'gray' | 'yellow'> = {
-  RESERVED: 'teal',
-  CANCELLED: 'red',
-  USED: 'gray',
+const STATUS_COLOR: Record<string, string> = {
+  COMPLETED: C.success,
+  PENDING: C.warning,
+  CANCELED: C.fg4,
+  REFUNDED: C.info,
+  FAILED: C.error,
 }
 
-function TicketCard({ ticket }: { ticket: TicketResponse }) {
-  const { mutate: cancel, isPending } = useCancelTicket()
+function PaymentCard({ item, onCancel }: { item: PaymentHistoryItem; onCancel?: (item: PaymentHistoryItem) => void }) {
+  const color = STATUS_COLOR[item.status] ?? C.fg3
+  const label = STATUS_LABEL[item.status] ?? item.status
 
   return (
     <div style={{
-      background: C.card, border: `1px solid ${C.border}`,
-      borderRadius: 14, padding: 20,
+      background: C.card, border: `1px solid ${C.border}`, borderRadius: 16,
+      padding: 20, display: 'flex', flexDirection: 'column', gap: 12,
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-        <Badge variant={(STATUS_VARIANT[ticket.status] as 'teal' | 'red' | 'gray') ?? 'teal'}>
-          {STATUS_LABEL[ticket.status] ?? ticket.status}
-        </Badge>
-        <span style={{ fontSize: 12, color: C.fg4 }}>
-          {new Date(ticket.createdAt).toLocaleDateString('ko-KR')}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ fontSize: 13, color: C.fg3, marginBottom: 4 }}>
+            {new Date(item.requestedAt).toLocaleString('ko-KR')}
+          </div>
+          <div style={{ fontSize: 12, color: C.fg4, fontFamily: 'monospace' }}>{item.orderId}</div>
+        </div>
+        <span style={{
+          fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 9999,
+          background: `${color}20`, color, border: `1px solid ${color}40`,
+        }}>
+          {label}
         </span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', gap: 16, fontSize: 13, color: C.fg3 }}>
-          <span>등급: <span style={{ color: C.fg1, fontWeight: 600 }}>{ticket.grade}</span></span>
-          <span>구역: <span style={{ color: C.fg1 }}>{ticket.section}</span></span>
-          <span>좌석: <span style={{ color: C.fg1 }}>{ticket.rowNumber}열 {ticket.seatNumber}번</span></span>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Badge variant="teal">{item.paymentMethod ?? 'CARD'}</Badge>
         </div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: C.teal }}>
-          {ticket.price.toLocaleString()}원
-        </div>
+        <span style={{ fontSize: 20, fontWeight: 800, color: C.teal }}>
+          {item.amount.toLocaleString()}원
+        </span>
       </div>
-      {ticket.status === 'RESERVED' && (
-        <div style={{ marginTop: 14 }}>
-          <Btn
-            variant="ghost" size="sm"
-            onClick={() => cancel(ticket.ticketId)}
-            disabled={isPending}
-          >
+
+      {item.approvedAt && (
+        <div style={{ fontSize: 12, color: C.fg4 }}>
+          승인: {new Date(item.approvedAt).toLocaleString('ko-KR')}
+        </div>
+      )}
+
+      {item.status === 'COMPLETED' && onCancel && (
+        <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+          <Btn variant="ghost" size="sm" onClick={() => onCancel(item)}>
             예매 취소
           </Btn>
         </div>
@@ -59,25 +73,47 @@ function TicketCard({ ticket }: { ticket: TicketResponse }) {
 }
 
 export function TicketPage() {
-  const { data: tickets, isLoading, isError } = useTickets()
+  const navigate = useNavigate()
+  const [history, setHistory] = useState<PaymentHistoryItem[]>(() => loadPaymentHistory())
+
+  const handleCancel = (item: PaymentHistoryItem) => {
+    if (!confirm(`주문 ${item.orderId}을 취소하시겠습니까?`)) return
+    // 로컬 상태만 CANCELED로 업데이트 (백엔드 cancel API는 paymentId 필요)
+    const updated = history.map((h) =>
+      h.orderId === item.orderId ? { ...h, status: 'CANCELED' } : h
+    )
+    setHistory(updated)
+    localStorage.setItem('paymentHistory', JSON.stringify(updated))
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
       <NavBar />
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24 }}>내 예매 내역</h1>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>예매 내역</h1>
+          <Btn variant="secondary" size="sm" onClick={() => navigate('/')}>
+            경기 보러가기
+          </Btn>
+        </div>
 
-        {isLoading && <p style={{ color: C.fg3 }}>불러오는 중...</p>}
-        {isError && <p style={{ color: C.fg4, fontSize: 14 }}>예매 내역을 불러올 수 없습니다. (서비스 준비 중)</p>}
-        {!isLoading && !isError && tickets?.length === 0 && (
-          <div style={{ textAlign: 'center', paddingTop: 60, color: C.fg4, fontSize: 14 }}>
-            예매 내역이 없습니다.
+        {history.length === 0 ? (
+          <div style={{
+            textAlign: 'center', paddingTop: 80, display: 'flex',
+            flexDirection: 'column', alignItems: 'center', gap: 16,
+          }}>
+            <div style={{ fontSize: 48, color: C.fg4 }}>🎫</div>
+            <div style={{ fontSize: 15, color: C.fg3, fontWeight: 600 }}>예매 내역이 없습니다</div>
+            <div style={{ fontSize: 13, color: C.fg4 }}>경기를 선택하고 좌석을 예매해보세요</div>
+            <Btn onClick={() => navigate('/')}>경기 목록 보기</Btn>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {history.map((item) => (
+              <PaymentCard key={item.orderId} item={item} onCancel={handleCancel} />
+            ))}
           </div>
         )}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {tickets?.map((t) => <TicketCard key={t.ticketId} ticket={t} />)}
-        </div>
       </div>
     </div>
   )
