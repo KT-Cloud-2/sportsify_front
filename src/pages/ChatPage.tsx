@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
 import { ChatPanel } from '../components/ChatPanel'
 import { Btn } from '../components/Btn'
 import {
   useChatRooms,
+  useChatRoomsByGame,
   useChatRoomDetail,
   useJoinChatRoom,
   useLeaveChatRoom,
   useMessages,
-  useSendMessage,
   useDeleteMessage,
 } from '../hooks/useChat'
+import { useStompChat } from '../hooks/useStompChat'
 import { useMe } from '../hooks/useMembers'
 import { C } from '../styles/tokens'
 
@@ -54,16 +56,42 @@ function RoomHeader({ roomId, currentUserId }: { roomId: number; currentUserId: 
   )
 }
 
+function ChatArea({ roomId, currentUserId }: { roomId: number; currentUserId: number }) {
+  const { data: messages = [] } = useMessages(roomId)
+  const { mutate: deleteMsg } = useDeleteMessage(roomId)
+  const { sendMessage } = useStompChat(roomId)
+
+  return (
+    <>
+      <RoomHeader roomId={roomId} currentUserId={currentUserId} />
+      <ChatPanel
+        messages={messages}
+        currentUserId={currentUserId}
+        onSend={sendMessage}
+        onDelete={deleteMsg}
+        isSending={false}
+      />
+    </>
+  )
+}
+
 export function ChatPage() {
+  const [searchParams] = useSearchParams()
+  const gameIdParam = searchParams.get('gameId')
+  const gameId = gameIdParam ? Number(gameIdParam) : 0
+
   const { data: rooms, isLoading: roomsLoading } = useChatRooms()
+  const { data: gameRooms } = useChatRoomsByGame(gameId)
   const { data: me } = useMe()
   const [selectedRoomId, setSelectedRoomId] = useState<number>(0)
 
-  const { data: messages = [] } = useMessages(selectedRoomId)
-  const { mutate: send, isPending } = useSendMessage(selectedRoomId)
-  const { mutate: deleteMsg } = useDeleteMessage(selectedRoomId)
-
   const currentUserId = me?.memberId ?? 0
+
+  useEffect(() => {
+    if (gameId && gameRooms && gameRooms.items.length > 0 && selectedRoomId === 0) {
+      setSelectedRoomId(gameRooms.items[0].roomId)
+    }
+  }, [gameId, gameRooms, selectedRoomId])
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: C.dark, color: C.fg1 }}>
@@ -96,16 +124,7 @@ export function ChatPage() {
         {/* 채팅 영역 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {selectedRoomId > 0 ? (
-            <>
-              <RoomHeader roomId={selectedRoomId} currentUserId={currentUserId} />
-              <ChatPanel
-                messages={messages}
-                currentUserId={currentUserId}
-                onSend={send}
-                onDelete={deleteMsg}
-                isSending={isPending}
-              />
-            </>
+            <ChatArea roomId={selectedRoomId} currentUserId={currentUserId} />
           ) : (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.fg4, flexDirection: 'column', gap: 8 }}>
               <div style={{ fontSize: 24 }}>💬</div>
