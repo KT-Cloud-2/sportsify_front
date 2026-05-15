@@ -1,18 +1,17 @@
 import { client } from './client'
 import {
   NotificationResponse,
+  PageNotificationResponse,
   NotificationSettingResponse,
   UpdateNotificationSettingRequest,
   NotificationChannelResponse,
   RegisterChannelRequest,
 } from '../types/api'
 
-interface PageResponse<T> {
-  content: T[]
-}
-
-export const fetchNotifications = () =>
-  client.get<PageResponse<NotificationResponse>>('/api/notifications').then((r) => r.data.content)
+export const fetchNotifications = (page = 0, size = 20) =>
+  client
+    .get<PageNotificationResponse>('/api/notifications', { params: { page, size } })
+    .then((r) => r.data)
 
 export const markRead = (notificationId: number) =>
   client.patch<void>(`/api/notifications/${notificationId}/read`)
@@ -37,3 +36,7 @@ export const deleteNotificationChannel = (channelId: number) =>
 
 export const toggleNotificationChannel = (channelId: number) =>
   client.patch<NotificationChannelResponse>(`/api/notifications/channels/${channelId}/toggle`).then((r) => r.data)
+
+// 백엔드 JwtAuthenticationFilter가 SSE 요청 시 ?token= 쿼리 파라미터를 지원
+export const getNotificationStreamUrl = (accessToken: string) =>
+  `/api/notifications/stream?token=${encodeURIComponent(accessToken)}`

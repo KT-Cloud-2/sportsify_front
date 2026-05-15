@@ -10,8 +10,9 @@ import {
   registerNotificationChannel,
   deleteNotificationChannel,
   toggleNotificationChannel,
+  getNotificationStreamUrl,
 } from '../api/notifications'
-import { NotificationResponse, UpdateNotificationSettingRequest, RegisterChannelRequest } from '../types/api'
+import { NotificationResponse, PageNotificationResponse, UpdateNotificationSettingRequest, RegisterChannelRequest } from '../types/api'
 import { useAuthStore } from '../store/auth'
 import { EVENT_LABEL, EVENT_ICON, formatPayloadMessage } from '../utils/notificationPayload'
 
@@ -36,13 +37,14 @@ export async function requestBrowserNotificationPermission(): Promise<Notificati
   return Notification.requestPermission()
 }
 
-export const useNotifications = () => {
+export const useNotifications = (page = 0, size = 20) => {
   const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
-    queryKey: ['notifications'],
-    queryFn: fetchNotifications,
+    queryKey: ['notifications', page, size],
+    queryFn: () => fetchNotifications(page, size),
     enabled: !!accessToken,
     throwOnError: false,
+    select: (data: PageNotificationResponse) => data.content,
   })
 }
 
@@ -59,6 +61,16 @@ export const useMarkAllRead = () => {
   return useMutation({
     mutationFn: markAllRead,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
+  })
+}
+
+export const useNotificationsPage = (page = 0, size = 20) => {
+  const accessToken = useAuthStore((s) => s.accessToken)
+  return useQuery({
+    queryKey: ['notifications', page, size],
+    queryFn: () => fetchNotifications(page, size),
+    enabled: !!accessToken,
+    throwOnError: false,
   })
 }
 
@@ -114,6 +126,7 @@ export const useToggleNotificationChannel = () => {
   })
 }
 
+// 백엔드가 SSE ?token= 쿼리 파라미터를 지원하므로 EventSource 사용
 export const useNotificationStream = () => {
   const qc = useQueryClient()
   const accessToken = useAuthStore((s) => s.accessToken)
@@ -121,26 +134,25 @@ export const useNotificationStream = () => {
   useEffect(() => {
     if (!accessToken) return
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL
     let es: EventSource
     let retryTimer: ReturnType<typeof setTimeout> | null = null
-    let retryDelay = 1000
+    let retryDelay = 2000
     let destroyed = false
 
     function connect() {
-      es = new EventSource(`${baseUrl}/api/notifications/stream?token=${accessToken}`)
+      const token = useAuthStore.getState().accessToken
+      if (!token) return
 
-      es.addEventListener('notification', (event) => {
-        retryDelay = 1000
+      es = new EventSource(getNotificationStreamUrl(token))
+
+      es.addEventListener('notification', (e) => {
+        retryDelay = 2000
         try {
-          const notification: NotificationResponse = JSON.parse(event.data)
-          qc.setQueryData<NotificationResponse[]>(['notifications'], (prev = []) => [
-            notification,
-            ...prev,
-          ])
+          const notification: NotificationResponse = JSON.parse(e.data)
+          qc.invalidateQueries({ queryKey: ['notifications'] })
           sendBrowserNotification(notification)
         } catch {
-          // ignore malformed event
+          // malformed event 무시
         }
       })
 
@@ -159,7 +171,7 @@ export const useNotificationStream = () => {
     return () => {
       destroyed = true
       if (retryTimer) clearTimeout(retryTimer)
-      es.close()
+      es?.close()
     }
   }, [accessToken, qc])
 }
