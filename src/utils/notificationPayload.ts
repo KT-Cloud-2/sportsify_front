@@ -25,6 +25,16 @@ function parse(payload: string): Record<string, unknown> | null {
   try { return JSON.parse(payload) } catch { return null }
 }
 
+function formatStartSuffix(gameStartAt: string | undefined): string {
+  if (!gameStartAt) return '곧 시작합니다'
+  const diff = Math.floor((new Date(gameStartAt).getTime() - Date.now()) / 60000)
+  if (diff <= 0) return '지금 시작했습니다'
+  if (diff < 60) return `${diff}분 뒤 시작합니다`
+  const h = Math.floor(diff / 60)
+  const m = diff % 60
+  return m > 0 ? `${h}시간 ${m}분 뒤 시작합니다` : `${h}시간 뒤 시작합니다`
+}
+
 export function formatPayloadMessage(eventType: NotificationEventType, payload: string): string {
   const p = parse(payload)
   if (!p) return payload
@@ -33,8 +43,11 @@ export function formatPayloadMessage(eventType: NotificationEventType, payload: 
     case 'GAME_START': {
       const home = p.homeTeam as string | undefined
       const away = p.awayTeam as string | undefined
-      const startsIn = p.startsIn as string | undefined
-      if (home && away) return `${away} vs ${home} 경기가 ${startsIn ?? '곧'} 시작됩니다`
+      const gameStartAt = p.gameStartAt as string | undefined
+      if (home && away) {
+        const suffix = formatStartSuffix(gameStartAt)
+        return `${home} vs ${away} 경기가 ${suffix}`
+      }
       break
     }
     case 'TICKET_OPEN': {
