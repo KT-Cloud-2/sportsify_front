@@ -8,7 +8,7 @@ import { ReservationSeatsResponseDto } from '../types/api'
 import { useAuthStore } from '../store/auth'
 import { C } from '../styles/tokens'
 
-const TOSS_CLIENT_KEY = 'test_ck_0RnYX2w5322llqkbJgRK3NeyqApQ'
+const TOSS_CLIENT_KEY = 'test_ck_DnyRpQWGrN6YKg5K0xAlrKwv1M9E'
 
 function SeatSummaryCard({ reservation }: { reservation: ReservationSeatsResponseDto }) {
   const total = reservation.seats.reduce((s, seat) => s + seat.price, 0)
@@ -71,6 +71,7 @@ export function PaymentPage() {
 
     createPayment(
       {
+        orderId: reservation.orderId,
         matchId: reservation.gameId,
         seatId: reservation.seats[0].seatId,
         amount: total,
@@ -83,7 +84,7 @@ export function PaymentPage() {
             const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY)
             await tossPayments.requestPayment('카드', {
               amount: total,
-              orderId: paymentOrder.orderId,
+              orderId: paymentOrder.tossOrderId,
               orderName: `스포츠 경기 예매 — ${seatInfo}`,
               customerName: '스포티파이 회원',
               successUrl: `${window.location.origin}/checkout/success`,
