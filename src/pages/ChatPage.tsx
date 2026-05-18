@@ -78,12 +78,15 @@ function ChatArea({ roomId, currentUserId }: { roomId: number; currentUserId: nu
 export function ChatPage() {
   const [searchParams] = useSearchParams()
   const gameIdParam = searchParams.get('gameId')
+  const roomIdParam = searchParams.get('roomId')
   const gameId = gameIdParam ? Number(gameIdParam) : 0
 
   const { data: rooms, isLoading: roomsLoading } = useChatRooms()
   const { data: gameRooms } = useChatRoomsByGame(gameId)
   const { data: me } = useMe()
-  const [selectedRoomId, setSelectedRoomId] = useState<number>(0)
+  const [selectedRoomId, setSelectedRoomId] = useState<number>(
+    roomIdParam ? Number(roomIdParam) : 0
+  )
 
   const currentUserId = me?.memberId ?? 0
 

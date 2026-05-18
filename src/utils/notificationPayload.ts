@@ -63,10 +63,10 @@ export function formatPayloadMessage(eventType: NotificationEventType, payload: 
       break
     }
     case 'CHAT_MENTION': {
-      const by = p.mentionedBy as string | undefined
-      const preview = p.preview as string | undefined
-      if (by && preview) return `${by}: ${preview}`
-      if (by) return `${by}님이 나를 멘션했습니다`
+      const senderName = p.senderName as string | undefined
+      const message = p.message as string | undefined
+      if (senderName && message) return `${senderName}: ${message}`
+      if (senderName) return `${senderName}님이 멘션했습니다`
       break
     }
   }
@@ -91,7 +91,9 @@ export function formatPayloadSub(eventType: NotificationEventType, payload: stri
       return orderId != null ? `주문번호 #${orderId}` : null
     }
     case 'CHAT_MENTION': {
+      const roomName = p.roomName as string | undefined
       const roomId = p.roomId as number | undefined
+      if (roomName) return roomName
       return roomId != null ? `채팅방 #${roomId}` : null
     }
     default:
