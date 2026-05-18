@@ -62,6 +62,7 @@ export const unarchiveChatRoom = (roomId: number) =>
 export const joinChatRoom = (roomId: number) =>
   client.post<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/join`).then((r) => r.data)
 
+// 백엔드 leave 엔드포인트가 /invite 경로를 사용 (백엔드 API 설계 제약)
 export const leaveChatRoom = (roomId: number) =>
   client.delete<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/invite`).then((r) => r.data)
 

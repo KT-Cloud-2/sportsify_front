@@ -1,5 +1,5 @@
 import { client } from './client'
-import { MemberResponse, FavoriteTeamResponse, UpdateNicknameResponse, MonthlyActivityResponse } from '../types/api'
+import { MemberResponse, FavoriteTeamResponse, UpdateNicknameResponse } from '../types/api'
 
 export const fetchMe = () =>
   client.get<MemberResponse>('/api/members').then((r) => r.data)
@@ -22,5 +22,6 @@ export const updateFavoriteTeamPriority = (teamId: number, priority: number) =>
 export const deleteFavoriteTeam = (teamId: number) =>
   client.delete<void>(`/api/members/favorite-teams/${teamId}`)
 
-export const fetchMonthlyActivity = (year?: number, month?: number) =>
-  client.get<MonthlyActivityResponse>('/api/members/activity/monthly', { params: { year, month } }).then((r) => r.data)
+// TODO: 백엔드 미구현 — 3주 후 활성화
+// export const fetchMonthlyActivity = (year?: number, month?: number) =>
+//   client.get<MonthlyActivityResponse>('/api/members/activity/monthly', { params: { year, month } }).then((r) => r.data)

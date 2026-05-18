@@ -59,9 +59,6 @@ export function GameDetailPage() {
   const [reservation, setReservation] = useState<ReservationSeatsResponseDto | null>(null)
   const [reserveError, setReserveError] = useState<string | null>(null)
 
-  const home = game?.teams.find((t) => t.side === 'HOME')
-  const away = game?.teams.find((t) => t.side === 'AWAY')
-
   const handleConfirm = (seat: GameSeatListResponseDto) => {
     setReserveError(null)
     reserveSeats(
@@ -80,54 +77,55 @@ export function GameDetailPage() {
     if (reservation) navigate('/payment', { state: reservation })
   }
 
-  if (isLoading) return <div style={{ color: C.fg3, padding: 48 }}>불러오는 중...</div>
-  if (!game) return null
-
-  const dateStr = new Date(game.gameTime).toLocaleString('ko-KR')
-
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
       <NavBar />
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: C.fg3, cursor: 'pointer', marginBottom: 24, fontSize: 14 }}>
-          ← 뒤로
-        </button>
+        {isLoading ? (
+          <div style={{ color: C.fg3, padding: 48 }}>불러오는 중...</div>
+        ) : game ? (
+          <>
+            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: C.fg3, cursor: 'pointer', marginBottom: 24, fontSize: 14 }}>
+              ← 뒤로
+            </button>
 
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28, marginBottom: 28 }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            <Badge variant="teal">{game.sportType}</Badge>
-            {game.isRivalMatch && <Badge variant="red">라이벌전</Badge>}
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 12 }}>
-            {home?.name} <span style={{ color: C.fg3 }}>vs</span> {away?.name}
-          </div>
-          <div style={{ display: 'flex', gap: 20, fontSize: 13, color: C.fg3 }}>
-            <span>📅 {dateStr}</span>
-            <span>🏟 {game.venue}</span>
-            <span>💺 잔여 {game.availableSeats}석</span>
-          </div>
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28, marginBottom: 28 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <Badge variant="teal">{game.sportType}</Badge>
+                {game.isRivalMatch && <Badge variant="red">라이벌전</Badge>}
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 12 }}>
+                {game.teams.find((t) => t.side === 'HOME')?.name} <span style={{ color: C.fg3 }}>vs</span> {game.teams.find((t) => t.side === 'AWAY')?.name}
+              </div>
+              <div style={{ display: 'flex', gap: 20, fontSize: 13, color: C.fg3 }}>
+                <span>📅 {new Date(game.gameTime).toLocaleString('ko-KR')}</span>
+                <span>🏟 {game.venue}</span>
+                <span>💺 잔여 {game.availableSeats}석</span>
+              </div>
 
-          {game.seatGradeSummary.length > 0 && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
-              {game.seatGradeSummary.map((g) => (
-                <div key={g.grade} style={{ background: C.elevated, borderRadius: 10, padding: '8px 14px', fontSize: 12 }}>
-                  <div style={{ color: C.fg3 }}>{g.grade}</div>
-                  <div style={{ color: C.teal, fontWeight: 700 }}>{g.price.toLocaleString()}원</div>
-                  <div style={{ color: C.fg2 }}>잔여 {g.available}</div>
+              {game.seatGradeSummary.length > 0 && (
+                <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+                  {game.seatGradeSummary.map((g) => (
+                    <div key={g.grade} style={{ background: C.elevated, borderRadius: 10, padding: '8px 14px', fontSize: 12 }}>
+                      <div style={{ color: C.fg3 }}>{g.grade}</div>
+                      <div style={{ color: C.teal, fontWeight: 700 }}>{g.price.toLocaleString()}원</div>
+                      <div style={{ color: C.fg2 }}>잔여 {g.available}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
 
-        {seats && seats.length > 0 && (
-          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>좌석 선택</h2>
-            {reserving && <div style={{ color: C.fg3, marginBottom: 12 }}>예약 처리 중...</div>}
-            {reserveError && <div style={{ color: C.error, fontSize: 13, marginBottom: 12 }}>{reserveError}</div>}
-            <SeatMap seats={seats} onConfirm={handleConfirm} />
-          </div>
-        )}
+            {seats && seats.length > 0 && (
+              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 28 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>좌석 선택</h2>
+                {reserving && <div style={{ color: C.fg3, marginBottom: 12 }}>예약 처리 중...</div>}
+                {reserveError && <div style={{ color: C.error, fontSize: 13, marginBottom: 12 }}>{reserveError}</div>}
+                <SeatMap seats={seats} onConfirm={handleConfirm} />
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
 
       {reservation && (

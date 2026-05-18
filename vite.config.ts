@@ -29,10 +29,6 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
-      '/payments': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
       '/dev': {
         target: 'http://localhost:8080',
         changeOrigin: true,

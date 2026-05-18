@@ -91,8 +91,8 @@ export function ChatPage() {
   const currentUserId = me?.memberId ?? 0
 
   useEffect(() => {
-    if (gameId && gameRooms && gameRooms.items.length > 0 && selectedRoomId === 0) {
-      setSelectedRoomId(gameRooms.items[0].roomId)
+    if (gameId && gameRooms && gameRooms.length > 0 && selectedRoomId === 0) {
+      setSelectedRoomId(gameRooms[0].roomId)
     }
   }, [gameId, gameRooms, selectedRoomId])
 

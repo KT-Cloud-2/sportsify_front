@@ -17,7 +17,7 @@ export function OAuthCallbackPage() {
     } else {
       navigate('/login', { replace: true })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setTokens, navigate])
 
   return (
     <div style={{ minHeight: '100vh', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.fg3 }}>

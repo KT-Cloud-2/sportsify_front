@@ -1,6 +1,5 @@
 import { client } from './client'
 import {
-  NotificationResponse,
   PageNotificationResponse,
   NotificationSettingResponse,
   UpdateNotificationSettingRequest,
