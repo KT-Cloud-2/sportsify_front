@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
 import { Btn } from '../components/Btn'
-import { confirmPaymentMock } from '../api/payments'
+import { confirmPayment } from '../api/payments'
 import { PaymentResponse } from '../types/api'
 import { savePaymentHistory } from '../utils/paymentHistory'
 import { C } from '../styles/tokens'
@@ -30,14 +30,18 @@ export function PaymentSuccessPage() {
   const [status, setStatus] = useState<'confirming' | 'success' | 'failed'>('confirming')
   const [result, setResult] = useState<PaymentResponse | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
+  const calledRef = useRef(false)
 
   useEffect(() => {
+    if (calledRef.current) return
+    calledRef.current = true
+
     if (!paymentKey || !orderId || !amount) {
       navigate('/', { replace: true })
       return
     }
 
-    confirmPaymentMock({ paymentKey, orderId, amount })
+    confirmPayment({ paymentKey, orderId, amount })
       .then((res) => {
         savePaymentHistory(res)
         setResult(res)
@@ -50,8 +54,10 @@ export function PaymentSuccessPage() {
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const pageBg = status === 'failed' ? `${C.error}08` : C.dark
+
   return (
-    <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
+    <div style={{ minHeight: '100vh', background: pageBg, color: C.fg1 }}>
       <NavBar />
       <div style={{ maxWidth: 540, margin: '0 auto', padding: '48px 24px' }}>
 
@@ -65,6 +71,7 @@ export function PaymentSuccessPage() {
             }} />
             <div style={{ fontSize: 16, fontWeight: 700, color: C.fg1 }}>결제 승인 중...</div>
             <div style={{ fontSize: 13, color: C.fg3, marginTop: 8 }}>잠시만 기다려주세요</div>
+            <div style={{ fontSize: 12, color: C.fg4, marginTop: 4 }}>창을 닫지 마세요</div>
           </div>
         )}
 
@@ -85,7 +92,7 @@ export function PaymentSuccessPage() {
 
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24, marginBottom: 24 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: C.fg3, marginBottom: 12 }}>주문 상세</div>
-              <Row label="주문번호" value={result.orderId} />
+              <Row label="주문번호" value={result.tossOrderId} />
               <Row label="결제 금액" value={`${result.amount.toLocaleString()}원`} />
               <Row label="결제 수단" value={result.paymentMethod ?? '카드'} />
               <Row label="결제 상태" value="완료" />
@@ -128,17 +135,34 @@ function FailedContent({ message, navigate }: { message: string; navigate: Retur
   return (
     <div style={{ textAlign: 'center', padding: '60px 0' }}>
       <div style={{
-        width: 72, height: 72, borderRadius: '50%',
-        background: `${C.error}20`, border: `2px solid ${C.error}`,
+        width: 80, height: 80, borderRadius: '50%',
+        background: `${C.error}25`, border: `3px solid ${C.error}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 20px', fontSize: 32, color: C.error,
+        margin: '0 auto 24px', fontSize: 36, color: C.error,
+        boxShadow: `0 0 24px ${C.error}30`,
       }}>
         ✗
       </div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: C.fg1, marginBottom: 6 }}>결제 승인 실패</div>
-      <div style={{ fontSize: 14, color: C.fg3, marginBottom: 8 }}>{message}</div>
-      <div style={{ fontSize: 13, color: C.fg4, marginBottom: 32 }}>
-        {countdown}초 후 홈으로 이동합니다
+      <div style={{ fontSize: 24, fontWeight: 800, color: C.error, marginBottom: 10 }}>결제 승인 실패</div>
+      <div style={{
+        background: `${C.error}15`, border: `1px solid ${C.error}40`,
+        borderRadius: 12, padding: '12px 20px', marginBottom: 12,
+        fontSize: 14, color: C.fg2, maxWidth: 360, margin: '0 auto 12px',
+      }}>
+        {message}
+      </div>
+      <div style={{
+        fontSize: 13, color: C.fg4, marginBottom: 36,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          width: 24, height: 24, borderRadius: '50%',
+          background: C.elevated, fontSize: 12, fontWeight: 700, color: C.fg2,
+        }}>
+          {countdown}
+        </span>
+        초 후 홈으로 이동합니다
       </div>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
         <Btn onClick={() => navigate(-1 as never)}>다시 시도</Btn>

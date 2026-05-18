@@ -130,6 +130,7 @@ export interface ReservationSeatsResponseDto {
 
 // Payment
 export interface CreatePaymentRequest {
+  orderId: number
   matchId: number
   seatId: number
   amount: number
@@ -149,7 +150,8 @@ export interface CancelPaymentRequest {
 
 export interface PaymentResponse {
   paymentId: number
-  orderId: string
+  orderId: number
+  tossOrderId: string
   paymentKey: string
   amount: number
   paymentMethod: string
