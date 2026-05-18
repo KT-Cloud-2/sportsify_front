@@ -163,7 +163,6 @@ export function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
       <NavBar />
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>

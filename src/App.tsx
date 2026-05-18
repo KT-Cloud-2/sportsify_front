@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Component, ReactNode, useEffect, useState } from 'react'
-import axios from 'axios'
+import { publicClient } from './api/client'
 import { LoginPage } from './pages/LoginPage'
 import { OAuthCallbackPage } from './pages/OAuthCallbackPage'
 import { HomePage } from './pages/HomePage'
@@ -33,7 +33,7 @@ function TokenRestorer({ children }: { children: ReactNode }) {
       setReady(true)
       return
     }
-    axios.post('/api/auth/token/refresh', { refreshToken })
+    publicClient.post('/api/auth/token/refresh', { refreshToken })
       .then(({ data }) => setTokens(data.accessToken, data.refreshToken))
       .catch(() => {
         // refreshToken도 만료 → 둘 다 삭제

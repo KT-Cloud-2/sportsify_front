@@ -78,18 +78,21 @@ function ChatArea({ roomId, currentUserId }: { roomId: number; currentUserId: nu
 export function ChatPage() {
   const [searchParams] = useSearchParams()
   const gameIdParam = searchParams.get('gameId')
+  const roomIdParam = searchParams.get('roomId')
   const gameId = gameIdParam ? Number(gameIdParam) : 0
 
   const { data: rooms, isLoading: roomsLoading } = useChatRooms()
   const { data: gameRooms } = useChatRoomsByGame(gameId)
   const { data: me } = useMe()
-  const [selectedRoomId, setSelectedRoomId] = useState<number>(0)
+  const [selectedRoomId, setSelectedRoomId] = useState<number>(
+    roomIdParam ? Number(roomIdParam) : 0
+  )
 
   const currentUserId = me?.memberId ?? 0
 
   useEffect(() => {
-    if (gameId && gameRooms && gameRooms.items.length > 0 && selectedRoomId === 0) {
-      setSelectedRoomId(gameRooms.items[0].roomId)
+    if (gameId && gameRooms && gameRooms.length > 0 && selectedRoomId === 0) {
+      setSelectedRoomId(gameRooms[0].roomId)
     }
   }, [gameId, gameRooms, selectedRoomId])
 

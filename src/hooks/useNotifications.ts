@@ -67,7 +67,7 @@ export const useMarkAllRead = () => {
 export const useNotificationsPage = (page = 0, size = 20) => {
   const accessToken = useAuthStore((s) => s.accessToken)
   return useQuery({
-    queryKey: ['notifications', page, size],
+    queryKey: ['notifications', 'page', page, size],
     queryFn: () => fetchNotifications(page, size),
     enabled: !!accessToken,
     throwOnError: false,

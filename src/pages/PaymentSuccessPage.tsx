@@ -63,7 +63,6 @@ export function PaymentSuccessPage() {
               margin: '0 auto 24px',
               animation: 'spin 1s linear infinite',
             }} />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             <div style={{ fontSize: 16, fontWeight: 700, color: C.fg1 }}>결제 승인 중...</div>
             <div style={{ fontSize: 13, color: C.fg3, marginTop: 8 }}>잠시만 기다려주세요</div>
           </div>

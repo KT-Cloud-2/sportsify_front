@@ -7,7 +7,6 @@ import {
   addFavoriteTeam,
   updateFavoriteTeamPriority,
   deleteFavoriteTeam,
-  fetchMonthlyActivity,
 } from '../api/members'
 import { fetchTeams } from '../api/teams'
 
@@ -60,10 +59,10 @@ export const useTeams = (sportType?: string) =>
     queryFn: () => fetchTeams(sportType, true),
   })
 
+// TODO: 백엔드 구현 후 fetchMonthlyActivity 연결 및 enabled: true로 변경
 export const useMonthlyActivity = (_year?: number, _month?: number) =>
   useQuery({
-    queryKey: ['monthlyActivity'],
-    queryFn: (): never => { throw new Error('not implemented') },
+    queryKey: ['monthlyActivity', _year, _month],
+    queryFn: (): Promise<never> => Promise.reject(new Error('not implemented')),
     enabled: false,
-    throwOnError: false,
   })

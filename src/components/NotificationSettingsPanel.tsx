@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { C } from '../styles/tokens'
-import { NotificationChannelType } from '../types/api'
+import { NotificationChannelType, NotificationSettingResponse } from '../types/api'
 import {
   useNotificationSetting,
   useUpdateNotificationSetting,
@@ -47,7 +47,7 @@ export function NotificationSettingsPanel() {
   const [newChannelType, setNewChannelType] = useState<NotificationChannelType>('EMAIL')
   const [newChannelTarget, setNewChannelTarget] = useState('')
 
-  const handleSettingToggle = (key: keyof typeof setting, value: boolean) => {
+  const handleSettingToggle = (key: keyof NotificationSettingResponse, value: boolean) => {
     if (!setting) return
     updateSetting({ ...setting, [key]: value })
   }

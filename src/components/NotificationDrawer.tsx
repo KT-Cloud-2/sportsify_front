@@ -23,8 +23,10 @@ function resolveNavPath(eventType: NotificationEventType, payload: string): stri
         return '/tickets'
       case 'PAYMENT_COMPLETED':
         return '/tickets'
-      case 'CHAT_MENTION':
-        return '/chat'
+      case 'CHAT_MENTION': {
+        const roomId = p.roomId as number | undefined
+        return roomId != null ? `/chat?roomId=${roomId}` : '/chat'
+      }
     }
   } catch {
     // malformed payload — fall through

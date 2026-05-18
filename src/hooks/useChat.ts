@@ -141,7 +141,6 @@ export const useMessages = (roomId: number) => {
     queryKey: ['messages', roomId],
     queryFn: () => fetchMessages(roomId),
     enabled: !!accessToken && roomId > 0,
-    refetchInterval: 3000,
     throwOnError: false,
     select: (data) => data.items,
   })

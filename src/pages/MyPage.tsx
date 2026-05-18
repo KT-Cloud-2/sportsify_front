@@ -162,12 +162,11 @@ export function MyPage() {
   const [showAddTeam, setShowAddTeam] = useState(false)
   const { handleLogout } = useAuth()
 
-  if (isLoading) return <div style={{ color: C.fg3, padding: 48 }}>불러오는 중...</div>
-
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
       <NavBar />
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {isLoading ? <div style={{ color: C.fg3, padding: 48 }}>불러오는 중...</div> : (<>
 
         {/* 프로필 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24 }}>
@@ -225,6 +224,7 @@ export function MyPage() {
             <DeleteAccountSection onLogout={handleLogout} />
           </div>
         </div>
+        </>)}
       </div>
     </div>
   )
