@@ -1,23 +1,27 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { C } from '../styles/tokens'
 import { useNotifications, useNotificationStream, requestBrowserNotificationPermission } from '../hooks/useNotifications'
 import { NotificationDrawer } from './NotificationDrawer'
 import { useAuthStore } from '../store/auth'
+import { useMe } from '../hooks/useMembers'
+import { useAuth } from '../hooks/useAuth'
 
 const navItems = [
   { id: 'home',    label: '홈',     path: '/' },
   { id: 'chat',    label: '팀 채팅', path: '/chat' },
-  { id: 'tickets', label: '예매 내역', path: '/tickets' },
-  { id: 'mypage',  label: '마이',   path: '/mypage' },
 ]
 
 export function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
   const accessToken = useAuthStore((s) => s.accessToken)
   const { data: notifications = [] } = useNotifications()
+  const { data: me } = useMe()
+  const { handleLogout } = useAuth()
   useNotificationStream()
 
   useEffect(() => {
@@ -30,6 +34,19 @@ export function NavBar() {
   useEffect(() => {
     document.title = unreadCount > 0 ? `(${unreadCount}) Sportify` : 'Sportify'
   }, [unreadCount])
+
+  useEffect(() => {
+    if (!profileOpen) return
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [profileOpen])
+
+  const initial = me?.nickname?.[0]?.toUpperCase() ?? '?'
 
   return (
     <>
@@ -64,12 +81,10 @@ export function NavBar() {
         })}
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 14, alignItems: 'center' }}>
+          {/* 알림 벨 */}
           <button
             onClick={() => setDrawerOpen((v) => !v)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              position: 'relative', padding: 4, lineHeight: 1,
-            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative', padding: 4, lineHeight: 1 }}
           >
             <span style={{ fontSize: 20, color: drawerOpen ? C.teal : C.fg2 }}>🔔</span>
             {unreadCount > 0 && (
@@ -81,6 +96,72 @@ export function NavBar() {
               }}>{unreadCount}</span>
             )}
           </button>
+
+          {/* 프로필 아바타 + 드롭다운 */}
+          <div ref={profileRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setProfileOpen((v) => !v)}
+              style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: profileOpen ? C.teal : C.elevated,
+                border: `2px solid ${profileOpen ? C.teal : C.border}`,
+                color: profileOpen ? C.deep : C.fg1,
+                fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s',
+              }}
+            >
+              {initial}
+            </button>
+
+            {profileOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                background: C.card, border: `1px solid ${C.border}`,
+                borderRadius: 12, minWidth: 160, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                overflow: 'hidden', zIndex: 100,
+              }}>
+                {me && (
+                  <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.fg1 }}>{me.nickname}</div>
+                    <div style={{ fontSize: 11, color: C.fg4, marginTop: 2 }}>{me.email}</div>
+                  </div>
+                )}
+                {[
+                  { label: '마이페이지', action: () => { navigate('/mypage'); setProfileOpen(false) } },
+                  { label: '예매 내역',  action: () => { navigate('/tickets'); setProfileOpen(false) } },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={item.action}
+                    style={{
+                      width: '100%', background: 'none', border: 'none', padding: '11px 16px',
+                      textAlign: 'left', fontSize: 13, color: C.fg2, cursor: 'pointer',
+                      display: 'block',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = C.elevated)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <div style={{ borderTop: `1px solid ${C.border}` }}>
+                  <button
+                    onClick={() => { handleLogout(); setProfileOpen(false) }}
+                    style={{
+                      width: '100%', background: 'none', border: 'none', padding: '11px 16px',
+                      textAlign: 'left', fontSize: 13, color: C.error, cursor: 'pointer',
+                      display: 'block',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = C.elevated)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

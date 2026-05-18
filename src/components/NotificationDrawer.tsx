@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { C } from '../styles/tokens'
-import { NotificationResponse } from '../types/api'
+import { NotificationResponse, NotificationEventType } from '../types/api'
 import { useMarkRead, useMarkAllRead } from '../hooks/useNotifications'
 import {
   EVENT_LABEL,
@@ -9,6 +10,27 @@ import {
   formatPayloadMessage,
   formatPayloadSub,
 } from '../utils/notificationPayload'
+
+function resolveNavPath(eventType: NotificationEventType, payload: string): string | null {
+  try {
+    const p = JSON.parse(payload) as Record<string, unknown>
+    switch (eventType) {
+      case 'GAME_START': {
+        const gameId = p.gameId as number | undefined
+        return gameId != null ? `/games/${gameId}` : '/'
+      }
+      case 'TICKET_OPEN':
+        return '/tickets'
+      case 'PAYMENT_COMPLETED':
+        return '/tickets'
+      case 'CHAT_MENTION':
+        return '/chat'
+    }
+  } catch {
+    // malformed payload — fall through
+  }
+  return null
+}
 
 function formatTime(iso: string) {
   const d = new Date(iso)
@@ -29,6 +51,7 @@ interface Props {
 }
 
 export function NotificationDrawer({ open, notifications, onClose }: Props) {
+  const navigate = useNavigate()
   const { mutate: markRead } = useMarkRead()
   const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllRead()
   const drawerRef = useRef<HTMLDivElement>(null)
@@ -125,15 +148,19 @@ export function NotificationDrawer({ open, notifications, onClose }: Props) {
             notifications.map((n) => {
               const color = EVENT_COLOR[n.eventType]
               const sub = formatPayloadSub(n.eventType, n.payload)
+              const navPath = resolveNavPath(n.eventType, n.payload)
               return (
                 <div
                   key={n.id}
-                  onClick={() => { if (!n.read) markRead(n.id) }}
+                  onClick={() => {
+                    if (!n.read) markRead(n.id)
+                    if (navPath) { onClose(); navigate(navPath) }
+                  }}
                   style={{
                     padding: '14px 20px',
                     borderBottom: `1px solid ${C.border}`,
                     background: n.read ? 'transparent' : 'rgba(93,187,160,0.06)',
-                    cursor: n.read ? 'default' : 'pointer',
+                    cursor: 'pointer',
                     display: 'flex', gap: 12, alignItems: 'flex-start',
                   }}
                 >
