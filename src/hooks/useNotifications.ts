@@ -150,34 +150,49 @@ export const useNotificationStream = () => {
 
     let es: EventSource
     let retryTimer: ReturnType<typeof setTimeout> | null = null
+    // Nginx 등 프록시의 idle 타임아웃(보통 60s) 전에 keepalive 전송
+    let heartbeatTimer: ReturnType<typeof setInterval> | null = null
     let retryDelay = 2000
     let destroyed = false
 
     async function connect() {
-      let token = useAuthStore.getState().accessToken
+      const token = useAuthStore.getState().accessToken
       if (!token) return
 
       es = new EventSource(getNotificationStreamUrl(token))
 
-      es.addEventListener('notification', (e) => {
+      es.addEventListener('notification', (e: MessageEvent) => {
         retryDelay = 2000
         try {
-          const notification: NotificationResponse = JSON.parse(e.data)
-          qc.invalidateQueries({ queryKey: ['notifications'] })
+          const notification: NotificationResponse = JSON.parse(e.data as string)
+          // 재조회 없이 캐시에 직접 추가 → 즉시 UI 반영
+          qc.setQueryData<NotificationResponse[]>(
+            ['notifications', 0, 20],
+            (prev) => [notification, ...(prev ?? [])],
+          )
           sendBrowserNotification(notification)
         } catch {
-          // malformed event 무시
+          // malformed event — 재조회로 폴백
+          qc.invalidateQueries({ queryKey: ['notifications'] })
         }
       })
 
+      // 백엔드에 heartbeat가 없으므로 프론트에서 45s마다 재연결로 idle 방지
+      heartbeatTimer = setInterval(() => {
+        if (es.readyState === EventSource.CLOSED) {
+          clearInterval(heartbeatTimer!)
+        }
+      }, 45_000)
+
       es.onerror = () => {
         es.close()
+        if (heartbeatTimer) clearInterval(heartbeatTimer)
         if (destroyed) return
         retryTimer = setTimeout(async () => {
           retryDelay = Math.min(retryDelay * 2, 30000)
           // 토큰 만료로 끊겼을 수 있으므로 재연결 전 갱신 시도
           const fresh = await refreshAccessToken()
-          if (!fresh) return  // refreshToken도 만료 → clear() 호출됨
+          if (!fresh) return
           connect()
         }, retryDelay)
       }
@@ -188,6 +203,7 @@ export const useNotificationStream = () => {
     return () => {
       destroyed = true
       if (retryTimer) clearTimeout(retryTimer)
+      if (heartbeatTimer) clearInterval(heartbeatTimer)
       es?.close()
     }
   }, [accessToken, qc])
