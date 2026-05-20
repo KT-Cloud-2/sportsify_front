@@ -43,12 +43,11 @@ function TokenRestorer({ children }: { children: ReactNode }) {
       .finally(() => setReady(true))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const accessToken = useAuthStore((s) => s.accessToken)
   useEffect(() => {
-    if (!ready) return
-    const { accessToken } = useAuthStore.getState()
     if (!accessToken) return
     return startTokenRefreshTimer()
-  }, [ready])
+  }, [accessToken])
 
   if (!ready) return (
     <div style={{ minHeight: '100vh', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
