@@ -187,9 +187,9 @@ export function HomePage() {
   }
 
   const allFiltered = games?.filter((g) => {
-    const isSoldOut = g.availableSeats === 0 || g.status !== 'ON_SALE'
-    if (isSoldOut) return ticketFilters.has('SOLD_OUT')
-    return ticketFilters.has('ON_SALE')
+    const isOnSale = g.status === 'ON_SALE' && g.availableSeats > 0
+    if (isOnSale) return ticketFilters.has('ON_SALE')
+    return ticketFilters.has('SOLD_OUT')
   }) ?? []
   const filteredGames = allFiltered.slice(0, visibleCount)
   const hasMore = allFiltered.length > visibleCount
