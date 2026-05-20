@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { publicClient } from '../api/client'
 import {
   fetchNotifications,
   markRead,
@@ -126,6 +127,19 @@ export const useToggleNotificationChannel = () => {
   })
 }
 
+async function refreshAccessToken(): Promise<string | null> {
+  const { refreshToken, setTokens, clear } = useAuthStore.getState()
+  if (!refreshToken) return null
+  try {
+    const { data } = await publicClient.post('/api/auth/token/refresh', { refreshToken })
+    setTokens(data.accessToken, data.refreshToken)
+    return data.accessToken as string
+  } catch {
+    clear()
+    return null
+  }
+}
+
 // 백엔드가 SSE ?token= 쿼리 파라미터를 지원하므로 EventSource 사용
 export const useNotificationStream = () => {
   const qc = useQueryClient()
@@ -139,8 +153,8 @@ export const useNotificationStream = () => {
     let retryDelay = 2000
     let destroyed = false
 
-    function connect() {
-      const token = useAuthStore.getState().accessToken
+    async function connect() {
+      let token = useAuthStore.getState().accessToken
       if (!token) return
 
       es = new EventSource(getNotificationStreamUrl(token))
@@ -159,8 +173,11 @@ export const useNotificationStream = () => {
       es.onerror = () => {
         es.close()
         if (destroyed) return
-        retryTimer = setTimeout(() => {
+        retryTimer = setTimeout(async () => {
           retryDelay = Math.min(retryDelay * 2, 30000)
+          // 토큰 만료로 끊겼을 수 있으므로 재연결 전 갱신 시도
+          const fresh = await refreshAccessToken()
+          if (!fresh) return  // refreshToken도 만료 → clear() 호출됨
           connect()
         }, retryDelay)
       }
