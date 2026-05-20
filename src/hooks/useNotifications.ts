@@ -177,11 +177,10 @@ export const useNotificationStream = () => {
         }
       })
 
-      // 백엔드에 heartbeat가 없으므로 프론트에서 45s마다 재연결로 idle 방지
+      // 백엔드 heartbeat 없음 — Nginx idle 타임아웃(60s) 전에 주기적으로 재연결
       heartbeatTimer = setInterval(() => {
-        if (es.readyState === EventSource.CLOSED) {
-          clearInterval(heartbeatTimer!)
-        }
+        es.close()
+        connect()
       }, 45_000)
 
       es.onerror = () => {
