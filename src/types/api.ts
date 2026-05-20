@@ -90,7 +90,8 @@ export interface GameDetailResponseDto {
   totalSeats: number
   availableSeats: number
   isRivalMatch: boolean
-  seatGradeSummary: SeatGradeSummary[]
+  seatGradeSummary: SeatGradeSummary[],
+  maxTicketPerUser: number
 }
 
 export interface GameSeatListResponseDto {
@@ -381,4 +382,28 @@ export interface NotificationChannelResponse {
 export interface RegisterChannelRequest {
   channelType: NotificationChannelType
   channelTarget: string
+}
+
+export interface TicketItemDto {
+  ticketId: number
+  gameId: number
+  seatGrade: string
+  seatSection: string
+  seatRowNumber: string
+  seatNumber: string
+  price: number
+  status: string
+  issuedAt: string
+  homeTeamName?: string
+  awayTeamName?: string
+  gameTime?: string
+  venue?: string
+}
+
+export interface TicketListResponseDto {
+  items: TicketItemDto[]
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  hasNext: boolean
 }

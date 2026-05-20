@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { reserveSeats } from '../api/tickets'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { reserveSeats, fetchMyTickets } from '../api/tickets'
 import { ReservationSeatsRequestDto } from '../types/api'
 
 export const useReserveSeats = () => {
@@ -9,3 +9,9 @@ export const useReserveSeats = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reservations'] }),
   })
 }
+
+export const useMyTickets = (page: number = 0, size: number = 10) =>
+    useQuery({
+      queryKey: ['tickets', page, size],
+      queryFn: () => fetchMyTickets(page, size),
+    })
