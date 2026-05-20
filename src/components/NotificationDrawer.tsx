@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { C } from '../styles/tokens'
-import { NotificationResponse, NotificationEventType } from '../types/api'
+import { NotificationResponse } from '../types/api'
 import { useMarkRead, useMarkAllRead } from '../hooks/useNotifications'
 import {
   EVENT_LABEL,
@@ -9,30 +9,8 @@ import {
   EVENT_COLOR,
   formatPayloadMessage,
   formatPayloadSub,
+  resolveNavPath,
 } from '../utils/notificationPayload'
-
-function resolveNavPath(eventType: NotificationEventType, payload: string): string | null {
-  try {
-    const p = JSON.parse(payload) as Record<string, unknown>
-    switch (eventType) {
-      case 'GAME_START': {
-        const gameId = p.gameId as number | undefined
-        return gameId != null ? `/games/${gameId}` : '/'
-      }
-      case 'TICKET_OPEN':
-        return '/tickets'
-      case 'PAYMENT_COMPLETED':
-        return '/tickets'
-      case 'CHAT_MENTION': {
-        const roomId = p.roomId as number | undefined
-        return roomId != null ? `/chat?roomId=${roomId}` : '/chat'
-      }
-    }
-  } catch {
-    // malformed payload — fall through
-  }
-  return null
-}
 
 function formatTime(iso: string) {
   const d = new Date(iso)
