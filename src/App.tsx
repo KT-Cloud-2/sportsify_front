@@ -15,6 +15,7 @@ import { PaymentFailPage } from './pages/PaymentFailPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { useAuthStore } from './store/auth'
 import { useNotificationStream } from './hooks/useNotifications'
+import { startTokenRefreshTimer } from './api/client'
 import { C } from './styles/tokens'
 
 const queryClient = new QueryClient({
@@ -37,11 +38,17 @@ function TokenRestorer({ children }: { children: ReactNode }) {
     publicClient.post('/api/auth/token/refresh', { refreshToken })
       .then(({ data }) => setTokens(data.accessToken, data.refreshToken))
       .catch(() => {
-        // refreshToken도 만료 → 둘 다 삭제
         clear()
       })
       .finally(() => setReady(true))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!ready) return
+    const { accessToken } = useAuthStore.getState()
+    if (!accessToken) return
+    return startTokenRefreshTimer()
+  }, [ready])
 
   if (!ready) return (
     <div style={{ minHeight: '100vh', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

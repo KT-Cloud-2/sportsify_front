@@ -22,6 +22,24 @@ client.interceptors.request.use((config) => {
 let isRefreshing = false
 let refreshQueue: Array<(token: string) => void> = []
 
+async function doRefresh(): Promise<string> {
+    const { refreshToken, setTokens, clear } = useAuthStore.getState()
+    if (!refreshToken) {
+        clear()
+        window.location.href = '/login'
+        throw new Error('no refresh token')
+    }
+    try {
+        const { data } = await publicClient.post('/api/auth/token/refresh', { refreshToken })
+        setTokens(data.accessToken, data.refreshToken)
+        return data.accessToken as string
+    } catch {
+        clear()
+        window.location.href = '/login'
+        throw new Error('refresh failed')
+    }
+}
+
 client.interceptors.response.use(
     (res) => res,
     async (error) => {
@@ -29,22 +47,12 @@ client.interceptors.response.use(
         const status = error.response?.status
 
         if (status !== 401 || original._retry) {
-            // 서버가 보내준 메시지가 있으면 Error.message로 변환
             if (error.response?.data?.message) {
-                const customError = new Error(error.response.data.message)
-                return Promise.reject(customError)
+                return Promise.reject(new Error(error.response.data.message))
             }
             return Promise.reject(error)
         }
         original._retry = true
-
-        const { refreshToken, setTokens, clear } = useAuthStore.getState()
-
-        if (!refreshToken) {
-            clear()
-            window.location.href = '/login'
-            return Promise.reject(error)
-        }
 
         if (isRefreshing) {
             return new Promise((resolve) => {
@@ -57,18 +65,35 @@ client.interceptors.response.use(
 
         isRefreshing = true
         try {
-            const { data } = await publicClient.post('/api/auth/token/refresh', { refreshToken })
-            setTokens(data.accessToken, data.refreshToken)
-            refreshQueue.forEach((cb) => cb(data.accessToken))
+            const newToken = await doRefresh()
+            refreshQueue.forEach((cb) => cb(newToken))
             refreshQueue = []
-            original.headers.Authorization = `Bearer ${data.accessToken}`
+            original.headers.Authorization = `Bearer ${newToken}`
             return client(original)
-        } catch {
-            clear()
-            window.location.href = '/login'
-            return Promise.reject(error)
         } finally {
             isRefreshing = false
         }
     }
 )
+
+// accessToken 5분마다 선제 갱신 — 만료 전에 교체해 401 없이 연속 사용
+// refresh 실패 시 doRefresh() 내부에서 clear() + /login 이동
+const ACCESS_TOKEN_REFRESH_INTERVAL = 5 * 60 * 1000
+
+export function startTokenRefreshTimer(): () => void {
+    const id = setInterval(async () => {
+        const { accessToken } = useAuthStore.getState()
+        if (!accessToken) return
+        if (isRefreshing) return
+        isRefreshing = true
+        try {
+            const newToken = await doRefresh()
+            refreshQueue.forEach((cb) => cb(newToken))
+            refreshQueue = []
+        } finally {
+            isRefreshing = false
+        }
+    }, ACCESS_TOKEN_REFRESH_INTERVAL)
+
+    return () => clearInterval(id)
+}
