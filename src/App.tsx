@@ -14,6 +14,7 @@ import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
 import { PaymentFailPage } from './pages/PaymentFailPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { useAuthStore } from './store/auth'
+import { useNotificationStream } from './hooks/useNotifications'
 import { C } from './styles/tokens'
 
 const queryClient = new QueryClient({
@@ -55,6 +56,11 @@ function PrivateRoute({ children }: { children: ReactNode }) {
   return accessToken ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+function NotificationStreamProvider() {
+  useNotificationStream()
+  return null
+}
+
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
   static getDerivedStateFromError() { return { hasError: true } }
@@ -78,6 +84,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TokenRestorer>
+        <NotificationStreamProvider />
         <ErrorBoundary>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
