@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavBar } from '../components/NavBar'
 import { GameCard } from '../components/GameCard'
@@ -161,6 +161,7 @@ export function HomePage() {
   const navigate = useNavigate()
   const [sportType, setSportType] = useState<string | undefined>()
   const [ticketFilters, setTicketFilters] = useState<Set<TicketFilter>>(new Set(['ON_SALE', 'SOLD_OUT']))
+  const [visibleCount, setVisibleCount] = useState(5)
   const { data: games, isLoading, isError } = useGames({ sportType })
 
   const today = new Date()
@@ -175,20 +176,34 @@ export function HomePage() {
     setTicketFilters((prev) => {
       const next = new Set(prev)
       if (next.has(v)) {
-        if (next.size === 1) return prev  // 최소 1개는 선택 유지
+        if (next.size === 1) return prev
         next.delete(v)
       } else {
         next.add(v)
       }
       return next
     })
+    setVisibleCount(5)
   }
 
-  const filteredGames = games?.filter((g) => {
+  const allFiltered = games?.filter((g) => {
     const isSoldOut = g.availableSeats === 0 || g.status !== 'ON_SALE'
     if (isSoldOut) return ticketFilters.has('SOLD_OUT')
     return ticketFilters.has('ON_SALE')
-  }).slice(0, 5)
+  }) ?? []
+  const filteredGames = allFiltered.slice(0, visibleCount)
+  const hasMore = allFiltered.length > visibleCount
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!hasMore || !sentinelRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisibleCount((n) => n + 5) },
+      { threshold: 0.1 },
+    )
+    observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
+  }, [hasMore, filteredGames.length])
 
   return (
     <div style={{ minHeight: '100vh', background: C.dark, color: C.fg1 }}>
@@ -255,10 +270,12 @@ export function HomePage() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
-          {filteredGames?.map((game) => (
+          {filteredGames.map((game) => (
             <GameCard key={game.gameId} game={game} onSelect={(id) => navigate(`/games/${id}`)} />
           ))}
         </div>
+
+        {hasMore && <div ref={sentinelRef} style={{ height: 40 }} />}
       </div>
     </div>
   )
