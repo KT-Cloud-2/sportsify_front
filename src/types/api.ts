@@ -171,6 +171,39 @@ export interface ChatRoomResponse {
   createdAt: string
 }
 
+export interface ChatMessageResponse {
+  messageId: number
+  content: string
+  type: string
+  createdAt: string
+}
+
+// GET /api/chat/rooms (내 채팅방 목록) 응답 아이템
+export interface ChatRoomSummaryResponse {
+  roomId: number
+  type: string
+  gameId: number | null
+  name: string
+  imageUrl: string | null
+  currentParticipants: number
+  lastMessage: ChatMessageResponse | null
+  unRead: number
+  notificationEnabled: boolean | null
+  createdAt: string
+  updatedAt: string
+}
+
+// GET /api/chat/rooms/game/{gameId} 응답 아이템
+export interface ChatRoomByGameResponse {
+  roomId: number
+  type: string
+  gameId: number | null
+  name: string
+  imageUrl: string | null
+  currentParticipants: number
+  createdAt: string
+}
+
 export interface ChatRoomDetailResponse {
   roomId: number
   type: string
@@ -190,6 +223,16 @@ export interface ChatRoomMemberResponse {
   joinedAt: string
 }
 
+export interface ChatRoomMemberInviteSummary {
+  roomId: number
+  status: string
+  updatedAt: string
+}
+
+export interface ChatRoomMemberInvitesResponse {
+  invites: ChatRoomMemberInviteSummary[]
+}
+
 export interface ChatRoomUpdateResponse {
   roomId: number
   name: string
@@ -203,6 +246,21 @@ export interface ChatRoomArchiveResponse {
   updatedAt: string
 }
 
+export interface ChatRoomSummaryListResponse {
+  items: ChatRoomSummaryResponse[]
+  nextCursor: number | null
+  hasNext: boolean
+  totalCount: number
+}
+
+export interface ChatRoomByGameListResponse {
+  items: ChatRoomByGameResponse[]
+  nextCursor: number | null
+  hasNext: boolean
+  totalCount: number
+}
+
+// legacy — 생성/수정 응답 등 단일 방 조회용으로만 사용
 export interface ChatRoomListResponse {
   items: ChatRoomResponse[]
   nextCursor: number | null
@@ -214,8 +272,14 @@ export interface MessageResponse {
   messageId: number
   senderId: number
   type: string
+  status: string
   content: string
   createdAt: string
+}
+
+export interface MessageMemberInfoSummaryResponse {
+  memberId: number
+  lastReadMessageId: number
 }
 
 export interface MessageDeleteResponse {
@@ -223,10 +287,45 @@ export interface MessageDeleteResponse {
 }
 
 export interface MessageListResponse {
-  items: MessageResponse[]
+  messages: MessageResponse[]
+  members: MessageMemberInfoSummaryResponse[] | null
   nextCursor: number | null
   hasNext: boolean
   totalCount: number
+}
+
+// STOMP event types
+export interface StompEventEnvelope<T = unknown> {
+  event: string
+  roomId: number
+  occurredAt: string
+  payload: T
+  alertMessageId?: number
+}
+
+export interface MessageSentPayload {
+  messageId: number
+  clientMessageId: string
+  senderId: number
+  type: string
+  content: string
+}
+
+export interface MessageDeletedPayload {
+  messageId: number
+}
+
+export interface StompReadReceiptPayload {
+  memberId: number
+  lastReadMessageId: number
+}
+
+export interface TypingEventPayload {
+  event: string
+  roomId: number
+  userId: number
+  typing: boolean
+  occurredAt: string
 }
 
 // Notification

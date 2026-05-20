@@ -1,11 +1,15 @@
 import { client, publicClient } from './client'
 import {
   ChatRoomResponse,
+  ChatRoomSummaryResponse,
+  ChatRoomByGameResponse,
   ChatRoomDetailResponse,
   ChatRoomMemberResponse,
+  ChatRoomMemberInvitesResponse,
   ChatRoomUpdateResponse,
   ChatRoomArchiveResponse,
-  ChatRoomListResponse,
+  ChatRoomSummaryListResponse,
+  ChatRoomByGameListResponse,
   MessageListResponse,
   MessageDeleteResponse,
 } from '../types/api'
@@ -18,8 +22,7 @@ interface CreateChatRoomRequest {
   inviteeIds?: number[]
 }
 
-interface ChatRoomGetRequest {
-  type?: string
+interface ChatRoomPageParams {
   cursor?: number
   limit?: number
 }
@@ -29,19 +32,21 @@ interface MessagePageNationRequest {
   limit?: number
 }
 
-// PUBLIC: /api/chat/rooms/** — SecurityConfig permitAll
-export const fetchChatRooms = (params: ChatRoomGetRequest = { limit: 50 }) =>
-  publicClient.get<ChatRoomListResponse>('/api/chat/rooms', { params }).then((r) => r.data.items ?? [])
+// AUTH: GET /api/chat/rooms — type은 @NotBlank 필수
+export const fetchChatRooms = (type: 'GAME' | 'DIRECT', params: ChatRoomPageParams = { limit: 20 }): Promise<ChatRoomSummaryResponse[]> =>
+  client.get<ChatRoomSummaryListResponse>('/api/chat/rooms', { params: { type, ...params } }).then((r) => r.data.items ?? [])
 
-export const fetchChatRoomsByGame = (gameId: number, params: ChatRoomGetRequest = { limit: 50 }) =>
-  publicClient.get<ChatRoomListResponse>(`/api/chat/rooms/game/${gameId}`, { params }).then((r) => r.data.items ?? [])
+// PUBLIC: GET /api/chat/rooms/game/{gameId}
+export const fetchChatRoomsByGame = (gameId: number, params: ChatRoomPageParams = { limit: 20 }): Promise<ChatRoomByGameResponse[]> =>
+  publicClient.get<ChatRoomByGameListResponse>(`/api/chat/rooms/game/${gameId}`, { params }).then((r) => r.data.items ?? [])
 
+// 공개 엔드포인트지만 myMembership 필드는 인증 토큰이 있어야 채워짐
 export const fetchChatRoomDetail = (roomId: number) =>
-  publicClient.get<ChatRoomDetailResponse>(`/api/chat/rooms/${roomId}`).then((r) => r.data)
+  client.get<ChatRoomDetailResponse>(`/api/chat/rooms/${roomId}`).then((r) => r.data)
 
-// PUBLIC: /api/chat/messages/getMessages/** — SecurityConfig permitAll
+// AUTH: Bearer 토큰 필요
 export const fetchMessages = (roomId: number, params: MessagePageNationRequest = { limit: 50 }) =>
-  publicClient.get<MessageListResponse>(`/api/chat/messages/getMessages/${roomId}`, { params }).then((r) => r.data)
+  client.get<MessageListResponse>(`/api/chat/messages/getMessages/${roomId}`, { params }).then((r) => r.data)
 
 // AUTH: 나머지 채팅 조작은 인증 필요
 export const createChatRoom = (body: CreateChatRoomRequest) =>
@@ -62,12 +67,17 @@ export const unarchiveChatRoom = (roomId: number) =>
 export const joinChatRoom = (roomId: number) =>
   client.post<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/join`).then((r) => r.data)
 
-// 백엔드 leave 엔드포인트가 /invite 경로를 사용 (백엔드 API 설계 제약)
 export const leaveChatRoom = (roomId: number) =>
-  client.delete<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/invite`).then((r) => r.data)
+  client.delete<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/leave`).then((r) => r.data)
 
 export const inviteToRoom = (roomId: number, inviteeId: number) =>
   client.post<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/invite`, null, { params: { inviteeId } }).then((r) => r.data)
+
+export const fetchMyInvites = () =>
+  client.get<ChatRoomMemberInvitesResponse>('/api/chat/rooms/getMyInvites').then((r) => r.data)
+
+export const rejectChatRoom = (roomId: number) =>
+  client.post<void>(`/api/chat/rooms/${roomId}/reject`)
 
 export const banFromRoom = (roomId: number, targetId: number) =>
   client.post<ChatRoomMemberResponse>(`/api/chat/rooms/${roomId}/ban`, null, { params: { targetId } }).then((r) => r.data)
