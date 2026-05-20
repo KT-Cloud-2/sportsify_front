@@ -14,6 +14,8 @@ import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
 import { PaymentFailPage } from './pages/PaymentFailPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { useAuthStore } from './store/auth'
+import { useNotificationStream } from './hooks/useNotifications'
+import { startTokenRefreshTimer } from './api/client'
 import { C } from './styles/tokens'
 
 const queryClient = new QueryClient({
@@ -36,11 +38,16 @@ function TokenRestorer({ children }: { children: ReactNode }) {
     publicClient.post('/api/auth/token/refresh', { refreshToken })
       .then(({ data }) => setTokens(data.accessToken, data.refreshToken))
       .catch(() => {
-        // refreshToken도 만료 → 둘 다 삭제
         clear()
       })
       .finally(() => setReady(true))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const accessToken = useAuthStore((s) => s.accessToken)
+  useEffect(() => {
+    if (!accessToken) return
+    return startTokenRefreshTimer()
+  }, [accessToken])
 
   if (!ready) return (
     <div style={{ minHeight: '100vh', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -53,6 +60,11 @@ function TokenRestorer({ children }: { children: ReactNode }) {
 function PrivateRoute({ children }: { children: ReactNode }) {
   const accessToken = useAuthStore((s) => s.accessToken)
   return accessToken ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+function NotificationStreamProvider() {
+  useNotificationStream()
+  return null
 }
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -78,6 +90,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TokenRestorer>
+        <NotificationStreamProvider />
         <ErrorBoundary>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
