@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { GameListResponseDto } from '../types/api'
 import { Badge } from './Badge'
 import { Btn } from './Btn'
 import { C } from '../styles/tokens'
+import { useChatRoomsByGame } from '../hooks/useChat'
 
 const sportMeta: Record<string, { label: string; icon: string; variant: 'baseball' | 'soccer' | 'basketball' }> = {
   BASEBALL:   { label: '야구', icon: '⚾', variant: 'baseball' },
@@ -15,6 +17,10 @@ interface GameCardProps {
 }
 
 export function GameCard({ game, onSelect }: GameCardProps) {
+  const navigate = useNavigate()
+  const { data: chatRooms } = useChatRoomsByGame(game.gameId)
+  const hasChatRoom = (chatRooms?.length ?? 0) > 0
+
   const meta = sportMeta[game.sportType] ?? { label: game.sportType, icon: '🏟', variant: 'teal' as const }
   const home = game.teams.find((t) => t.side === 'HOME')
   const away = game.teams.find((t) => t.side === 'AWAY')
@@ -30,8 +36,10 @@ export function GameCard({ game, onSelect }: GameCardProps) {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Badge variant={meta.variant}>{meta.icon} {meta.label}</Badge>
-        {game.isRivalMatch && <Badge variant="red">라이벌전</Badge>}
-        {isSoldOut && <Badge variant="gray">매진</Badge>}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {game.isRivalMatch && <Badge variant="red">라이벌전</Badge>}
+          {isSoldOut && <Badge variant="gray">매진</Badge>}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -46,13 +54,24 @@ export function GameCard({ game, onSelect }: GameCardProps) {
         <span>💺 잔여 {game.availableSeats}석</span>
       </div>
 
-      <Btn
-        variant={isSoldOut ? 'ghost' : 'primary'}
-        disabled={isSoldOut}
-        onClick={() => onSelect(game.gameId)}
-      >
-        {isSoldOut ? '매진' : '좌석 선택'}
-      </Btn>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <Btn
+          variant={isSoldOut ? 'ghost' : 'primary'}
+          disabled={isSoldOut}
+          onClick={() => onSelect(game.gameId)}
+          style={{ flex: 1 }}
+        >
+          {isSoldOut ? '매진' : '좌석 선택'}
+        </Btn>
+        {hasChatRoom && (
+          <Btn
+            variant="secondary"
+            onClick={() => navigate(`/chat?gameId=${game.gameId}`)}
+          >
+            💬 채팅
+          </Btn>
+        )}
+      </div>
     </div>
   )
 }
